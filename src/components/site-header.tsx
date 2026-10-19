@@ -12,12 +12,8 @@ export function SiteHeader() {
           >
             rkdotxyz
           </Link>
-          <p className="flex min-w-0 flex-wrap items-baseline gap-x-2 font-mono text-[11px] uppercase tracking-wider sm:text-xs">
-            <s className="hidden text-muted decoration-foreground/60 sm:inline">
-              Senior Product Designer
-            </s>
-            <s className="text-muted decoration-foreground/60 sm:hidden">Product Designer</s>
-            <span className="truncate text-foreground">Creative Technologist</span>
+          <p className="truncate font-mono text-[10px] uppercase tracking-wide text-muted sm:text-xs sm:tracking-wider">
+            Creative Technologist
           </p>
         </div>
         <VersionSwitcher />

@@ -28,6 +28,56 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+/* Generative placeholders for work cards without media. */
+.gen-rings {
+  background: repeating-radial-gradient(circle at 50% 55%, #1c1c1c 0 2px, #050505 2px 14px);
+  background-size: 140% 140%;
+  background-position: center;
+  animation: gen-breathe 6s ease-in-out infinite alternate;
+}
+.gen-stripes {
+  background: repeating-linear-gradient(-45deg, #161616 0 1px, #050505 1px 10px);
+  background-size: 200% 200%;
+  animation: gen-drift 12s linear infinite;
+}
+.gen-dots {
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 30%, #000 75%),
+    radial-gradient(circle, #2a2a2a 1.4px, transparent 1.6px) 0 0 / 12px 12px,
+    #050505;
+  animation: gen-pulse 2.4s ease-in-out infinite alternate;
+}
+.gen-sweep {
+  background:
+    radial-gradient(circle, transparent 60%, #000 72%),
+    conic-gradient(from 0deg, #050505 0 300deg, #262626 360deg);
+  scale: 1.5;
+  animation: gen-spin 7s linear infinite;
+}
+@keyframes gen-breathe {
+  from { background-size: 140% 140%; }
+  to { background-size: 170% 170%; }
+}
+@keyframes gen-drift {
+  to { background-position: 100% 100%; }
+}
+@keyframes gen-spin {
+  to { rotate: 360deg; }
+}
+@keyframes gen-pulse {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gen-rings,
+  .gen-stripes,
+  .gen-dots,
+  .gen-sweep {
+    animation: none;
+  }
+}
+
 ::selection {
   background: var(--foreground);
   color: var(--background);

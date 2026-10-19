@@ -54,7 +54,7 @@ export function VersionSwitcher() {
         <svg
           aria-hidden
           viewBox="0 0 10 6"
-          className={`h-1.5 w-2.5 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`hidden h-1.5 w-2.5 transition-transform sm:block ${open ? "rotate-180" : ""}`}
         >
           <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.2" />
         </svg>

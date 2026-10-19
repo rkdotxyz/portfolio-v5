@@ -1,4 +1,5 @@
 import { OpenCanvas } from "@/components/open-canvas";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
 export default function Home() {
@@ -8,6 +9,7 @@ export default function Home() {
       <main className="flex-1">
         <OpenCanvas />
       </main>
+      <SiteFooter />
     </>
   );
 }
