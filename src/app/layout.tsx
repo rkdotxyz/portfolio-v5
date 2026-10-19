@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SoundLayer } from "@/components/sound-layer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,7 +29,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full">
+        {/* clip (not hidden) so the sticky header keeps working */}
+        <div className="flex min-h-full flex-col overflow-x-clip">{children}</div>
+        <SoundLayer />
+      </body>
     </html>
   );
 }

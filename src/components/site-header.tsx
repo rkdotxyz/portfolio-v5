@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SoundToggle } from "./sound-toggle";
 import { VersionSwitcher } from "./version-switcher";
 
 export function SiteHeader() {
@@ -24,6 +25,7 @@ export function SiteHeader() {
           >
             CV <span aria-hidden>↓</span>
           </a>
+          <SoundToggle />
           <VersionSwitcher />
         </div>
       </div>

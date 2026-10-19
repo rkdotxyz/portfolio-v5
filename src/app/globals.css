@@ -76,6 +76,22 @@ body {
   50% { translate: 0 3px; }
 }
 
+/* Detection frame snapping onto its target. */
+@utility detect-in {
+  animation: detect-in 300ms ease-out;
+}
+@keyframes detect-in {
+  from { scale: 1.03; }
+}
+
+/* Dashed outline crawling around targets not yet acquired. */
+.marching-ants {
+  animation: marching-ants 0.9s linear infinite;
+}
+@keyframes marching-ants {
+  to { stroke-dashoffset: -8; }
+}
+
 /* Toast-style panels rising from the canvas toolbar. */
 .toast-in {
   animation: toast-in 180ms ease-out;
@@ -87,6 +103,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .scroll-cue-arrow,
   .toast-in,
+  .detect-in,
+  .marching-ants,
   .gen-rings,
   .gen-stripes,
   .gen-dots,

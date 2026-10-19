@@ -44,6 +44,7 @@ export function VersionSwitcher() {
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
+        data-sound={open ? "close" : "open"}
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-2 rounded-full border border-faint px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors hover:border-foreground sm:text-xs"
       >

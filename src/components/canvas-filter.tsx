@@ -71,6 +71,7 @@ export function CanvasFilter({
                     type="button"
                     role="checkbox"
                     aria-checked={on}
+                    data-sound={on ? "toggle-off" : "toggle-on"}
                     onClick={() => onToggle(c.id)}
                     className={`relative flex w-full items-center justify-between gap-3 border px-3 py-2.5 text-left text-sm transition-colors ${
                       on
@@ -105,6 +106,7 @@ export function CanvasFilter({
       <button
         type="button"
         aria-expanded={open}
+        data-sound={open ? "close" : "open"}
         onClick={() => setOpen((o) => !o)}
         className="flex h-9 items-center gap-2 rounded-full border border-line bg-surface/90 px-3.5 font-mono text-[11px] text-muted backdrop-blur transition-colors hover:text-foreground sm:text-xs"
       >

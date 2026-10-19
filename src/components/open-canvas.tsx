@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from "react";
 import { work, type Category } from "@/content/work";
+import { play, type SoundName } from "@/lib/sound";
 import { CanvasFilter, CATEGORIES } from "./canvas-filter";
 import { CanvasMinimap, type Rect } from "./canvas-minimap";
 import { WorkCard, cardHeight } from "./work-card";
@@ -197,6 +198,7 @@ export function OpenCanvas() {
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = { id, pointerId: e.pointerId, last: local(e) };
     setActiveId(id);
+    play("pickup");
     // Bring the dragged card to the top.
     setOrder((list) => [...list.filter((i) => i !== id), id]);
   };
@@ -216,6 +218,7 @@ export function OpenCanvas() {
     if (drag.current?.pointerId !== e.pointerId) return;
     drag.current = null;
     setActiveId(null);
+    play("drop");
   };
 
   const center = (): Point => ({ x: size.w / 2, y: size.h / 2 });
@@ -349,19 +352,20 @@ export function OpenCanvas() {
           <CanvasButton
             label={layout === "scatter" ? "Arrange in a grid" : "Scatter cards"}
             pressed={layout === "grid"}
+            sound="arrange"
             onClick={toggleLayout}
           >
             {layout === "scatter" ? <GridIcon /> : <ScatterIcon />}
           </CanvasButton>
           <span aria-hidden className="h-5 w-px bg-line" />
-          <CanvasButton label="Zoom out" onClick={() => zoomAt(center(), 1 / 1.2)}>
+          <CanvasButton label="Zoom out" sound="zoom-out" onClick={() => zoomAt(center(), 1 / 1.2)}>
             −
           </CanvasButton>
           <span className="hidden w-11 text-center tabular-nums text-muted sm:inline">{Math.round(view.s * 100)}%</span>
-          <CanvasButton label="Zoom in" onClick={() => zoomAt(center(), 1.2)}>
+          <CanvasButton label="Zoom in" sound="zoom-in" onClick={() => zoomAt(center(), 1.2)}>
             +
           </CanvasButton>
-          <CanvasButton label="Reset canvas" onClick={reset}>
+          <CanvasButton label="Reset canvas" sound="arrange" onClick={reset}>
             ⟲
           </CanvasButton>
         </div>
@@ -374,11 +378,13 @@ function CanvasButton({
   label,
   onClick,
   pressed,
+  sound,
   children,
 }: {
   label: string;
   onClick: () => void;
   pressed?: boolean;
+  sound?: SoundName;
   children: ReactNode;
 }) {
   return (
@@ -387,6 +393,7 @@ function CanvasButton({
       aria-label={label}
       title={label}
       aria-pressed={pressed}
+      data-sound={sound}
       onClick={onClick}
       className="flex h-9 w-9 items-center justify-center text-muted transition-colors hover:bg-line hover:text-foreground"
     >
