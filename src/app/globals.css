@@ -92,6 +92,20 @@ body {
   to { stroke-dashoffset: -8; }
 }
 
+/* Case study panel sliding in from the right. */
+.drawer-in[open] {
+  animation: drawer-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.drawer-in[open]::backdrop {
+  animation: fade-in 260ms ease-out;
+}
+@keyframes drawer-in {
+  from { translate: 24px 0; opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
 /* Toast-style panels rising from the canvas toolbar. */
 .toast-in {
   animation: toast-in 180ms ease-out;
@@ -105,6 +119,8 @@ body {
   .toast-in,
   .detect-in,
   .marching-ants,
+  .drawer-in[open],
+  .drawer-in[open]::backdrop,
   .gen-rings,
   .gen-stripes,
   .gen-dots,

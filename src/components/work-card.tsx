@@ -36,7 +36,7 @@ export function WorkCard({ item, active }: { item: WorkItem; active: boolean }) 
   );
 }
 
-function WorkMedia({ item }: { item: WorkItem }) {
+export function WorkMedia({ item, sizes = "320px" }: { item: WorkItem; sizes?: string }) {
   const { media } = item;
   if (!media) return <GenerativePlaceholder seed={item.id} />;
 
@@ -58,7 +58,7 @@ function WorkMedia({ item }: { item: WorkItem }) {
       src={media.src}
       alt={media.alt ?? item.title}
       fill
-      sizes="320px"
+      sizes={sizes}
       draggable={false}
       unoptimized={media.src.endsWith(".gif")}
       className="object-cover grayscale"

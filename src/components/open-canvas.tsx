@@ -1,9 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+  type Ref,
+} from "react";
 import { work, type Category } from "@/content/work";
 import { play, type SoundName } from "@/lib/sound";
 import { CanvasFilter, CATEGORIES } from "./canvas-filter";
+import { CaseStudyDialog } from "./case-study-dialog";
 import { CanvasMinimap, type Rect } from "./canvas-minimap";
 import { WorkCard, cardHeight } from "./work-card";
 
@@ -37,6 +48,30 @@ const initialPositions = () => Object.fromEntries(ITEMS.map((i) => [i.id, { x: i
 const initialOrder = () => ITEMS.map((i) => i.id);
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+// A press that moves less than this (screen px) counts as a click, not a drag.
+const TAP_SLOP = 5;
+
+// The open case study lives in the URL (?project=<id>) so it can be linked to
+// and the back button closes it.
+const PROJECT_EVENT = "projectchange";
+const subscribeProject = (onChange: () => void) => {
+  window.addEventListener("popstate", onChange);
+  window.addEventListener(PROJECT_EVENT, onChange);
+  return () => {
+    window.removeEventListener("popstate", onChange);
+    window.removeEventListener(PROJECT_EVENT, onChange);
+  };
+};
+const readProject = () => new URLSearchParams(window.location.search).get("project");
+const setProjectParam = (id: string | null, mode: "push" | "replace") => {
+  const url = new URL(window.location.href);
+  if (id) url.searchParams.set("project", id);
+  else url.searchParams.delete("project");
+  if (mode === "push") window.history.pushState(null, "", url);
+  else window.history.replaceState(null, "", url);
+  window.dispatchEvent(new Event(PROJECT_EVENT));
+};
 
 const gridColumns = (width: number) =>
   width < 640 ? 2 : clamp(Math.floor((width - 96 + GAP) / (COL + GAP)), 2, 5);
@@ -80,7 +115,29 @@ export function OpenCanvas() {
   const pointers = useRef(new Map<number, Point>());
   const pinch = useRef<{ dist: number; mid: Point } | null>(null);
   // Active card drag.
-  const drag = useRef<{ id: string; pointerId: number; last: Point } | null>(null);
+  const drag = useRef<{ id: string; pointerId: number; last: Point; start: Point; moved: boolean } | null>(null);
+  // A single-finger press on the background, to tell a click on a card from a pan.
+  const tap = useRef<{ start: Point; moved: boolean } | null>(null);
+  const pushedProject = useRef(false);
+
+  const projectId = useSyncExternalStore(subscribeProject, readProject, () => null);
+  const openItem = projectId ? (workById.get(projectId) ?? null) : null;
+
+  const openProject = (id: string) => {
+    if (!projectId) play("open");
+    // First open adds a history entry; moving between projects replaces it.
+    if (!projectId) pushedProject.current = true;
+    setProjectParam(id, projectId ? "replace" : "push");
+  };
+  const closeProject = () => {
+    play("close");
+    if (pushedProject.current) {
+      pushedProject.current = false;
+      window.history.back();
+    } else {
+      setProjectParam(null, "replace");
+    }
+  };
   const animTimer = useRef<number | undefined>(undefined);
   const fitted = useRef(false);
 
@@ -160,6 +217,7 @@ export function OpenCanvas() {
   const onBgDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, local(e));
+    tap.current = pointers.current.size === 1 ? { start: { x: e.clientX, y: e.clientY }, moved: false } : null;
     if (pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()];
       pinch.current = {
@@ -174,6 +232,9 @@ export function OpenCanvas() {
     if (!prev) return;
     const p = local(e);
     pointers.current.set(e.pointerId, p);
+    if (tap.current && Math.hypot(e.clientX - tap.current.start.x, e.clientY - tap.current.start.y) > TAP_SLOP) {
+      tap.current.moved = true;
+    }
 
     if (pointers.current.size === 1) {
       setView((v) => ({ ...v, x: v.x + p.x - prev.x, y: v.y + p.y - prev.y }));
@@ -191,12 +252,19 @@ export function OpenCanvas() {
   const onBgUp = (e: ReactPointerEvent<HTMLDivElement>) => {
     pointers.current.delete(e.pointerId);
     if (pointers.current.size < 2) pinch.current = null;
+    // A tap that didn't pan: open the card under it (cards in the grid
+    // layout aren't draggable, so their clicks arrive here).
+    if (tap.current && !tap.current.moved && pointers.current.size === 0) {
+      const card = document.elementFromPoint(e.clientX, e.clientY)?.closest<HTMLElement>("[data-work-id]");
+      if (card?.dataset.workId) openProject(card.dataset.workId);
+    }
+    tap.current = null;
   };
 
   const onCardDown = (id: string) => (e: ReactPointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { id, pointerId: e.pointerId, last: local(e) };
+    drag.current = { id, pointerId: e.pointerId, last: local(e), start: { x: e.clientX, y: e.clientY }, moved: false };
     setActiveId(id);
     play("pickup");
     // Bring the dragged card to the top.
@@ -207,6 +275,7 @@ export function OpenCanvas() {
     const d = drag.current;
     if (!d || d.pointerId !== e.pointerId) return;
     const p = local(e);
+    if (Math.hypot(e.clientX - d.start.x, e.clientY - d.start.y) > TAP_SLOP) d.moved = true;
     const s = viewRef.current.s;
     const dx = (p.x - d.last.x) / s;
     const dy = (p.y - d.last.y) / s;
@@ -215,10 +284,12 @@ export function OpenCanvas() {
   };
 
   const onCardUp = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (drag.current?.pointerId !== e.pointerId) return;
+    const d = drag.current;
+    if (d?.pointerId !== e.pointerId) return;
     drag.current = null;
     setActiveId(null);
-    play("drop");
+    if (d.moved) play("drop");
+    else if (workById.has(d.id)) openProject(d.id);
   };
 
   const center = (): Point => ({ x: size.w / 2, y: size.h / 2 });
@@ -303,12 +374,13 @@ export function OpenCanvas() {
             return (
               <div
                 key={id}
+                data-work-id={w ? id : undefined}
                 onPointerDown={draggable ? onCardDown(id) : undefined}
                 onPointerMove={draggable ? onCardMove : undefined}
                 onPointerUp={draggable ? onCardUp : undefined}
                 onPointerCancel={draggable ? onCardUp : undefined}
                 className={`absolute ${animating ? ease : "transition-opacity duration-300"} ${
-                  draggable ? "cursor-move touch-none" : ""
+                  draggable ? "cursor-move touch-none" : w ? "cursor-pointer" : ""
                 } ${visible ? "" : hidden}`}
                 style={{ left: pos.x, top: pos.y, width }}
               >
@@ -370,6 +442,7 @@ export function OpenCanvas() {
           </CanvasButton>
         </div>
       </div>
+      <CaseStudyDialog item={openItem} onClose={closeProject} onOpen={openProject} />
     </section>
   );
 }
