@@ -6,17 +6,23 @@ const ASPECT: Record<Category, string> = {
   project: "aspect-[4/3]",
   exploration: "aspect-square",
 };
+const RATIO: Record<Category, number> = { "key-project": 16 / 10, project: 4 / 3, exploration: 1 };
+
+// Rendered height of a card at a given width: border + padding, media, caption.
+// Keep in sync with the classes below; the canvas uses it for layout and the minimap.
+export const cardHeight = (category: Category, width: number) =>
+  2 + 16 + (width - 18) / RATIO[category] + 32;
 
 // A card of work on the canvas. Hover (or press, on touch) frames the whole
 // card in a MediaPipe-style detection box with a labelled tag.
 export function WorkCard({ item, active }: { item: WorkItem; active: boolean }) {
   return (
     <article data-active={active} className="group relative">
-      <div className="rounded-md border border-line bg-surface p-2">
-        <div className={`relative overflow-hidden rounded-sm bg-black ${ASPECT[item.category]}`}>
+      <div className="border border-line bg-surface p-2">
+        <div className={`relative overflow-hidden bg-black ${ASPECT[item.category]}`}>
           <WorkMedia item={item} />
         </div>
-        <div className="flex items-baseline justify-between gap-2 px-1 pb-0.5 pt-2.5">
+        <div className="flex h-8 items-center justify-between gap-2 px-1 pt-1">
           <h3 className="truncate text-sm">{item.title}</h3>
           <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted">
             {item.year ?? "exp"}
@@ -26,13 +32,13 @@ export function WorkCard({ item, active }: { item: WorkItem; active: boolean }) 
 
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-2.5 scale-105 border border-foreground opacity-0 transition-all duration-300 ease-out group-hover:scale-100 group-hover:opacity-100 group-data-[active=true]:scale-100 group-data-[active=true]:opacity-100"
+        className="pointer-events-none absolute inset-0 scale-[1.03] border border-foreground opacity-0 transition-all duration-300 ease-out group-hover:scale-100 group-hover:opacity-100 group-data-[active=true]:scale-100 group-data-[active=true]:opacity-100"
       >
         <Corner className="-left-px -top-px border-l-2 border-t-2" />
         <Corner className="-right-px -top-px border-r-2 border-t-2" />
         <Corner className="-bottom-px -left-px border-b-2 border-l-2" />
         <Corner className="-bottom-px -right-px border-b-2 border-r-2" />
-        <span className="absolute -left-px bottom-full whitespace-nowrap bg-foreground px-1.5 py-1 font-mono text-[10px] leading-none text-background">
+        <span className="absolute -left-px bottom-full mb-1 whitespace-nowrap bg-foreground px-1.5 py-1 font-mono text-[10px] leading-none text-background">
           {CATEGORY_LABEL[item.category]} {item.confidence.toFixed(2)}
         </span>
       </div>
@@ -41,7 +47,7 @@ export function WorkCard({ item, active }: { item: WorkItem; active: boolean }) 
 }
 
 function Corner({ className }: { className: string }) {
-  return <span className={`absolute h-2.5 w-2.5 border-foreground ${className}`} />;
+  return <span className={`absolute h-3 w-3 border-foreground ${className}`} />;
 }
 
 function WorkMedia({ item }: { item: WorkItem }) {

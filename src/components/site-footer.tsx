@@ -7,7 +7,10 @@ const links = [
 
 export function SiteFooter() {
   return (
-    <footer className="flex min-h-[80svh] flex-col justify-between gap-16 overflow-hidden px-4 pt-20 sm:px-6 sm:pt-28">
+    <footer
+      id="contact"
+      className="flex min-h-[80svh] flex-col justify-between gap-16 overflow-hidden px-4 pb-6 pt-20 sm:px-6 sm:pt-28"
+    >
       <div className="grid gap-12 md:grid-cols-[1.2fr_1fr] md:gap-16">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-wider text-muted sm:text-xs">
@@ -52,7 +55,7 @@ export function SiteFooter() {
         </div>
         <p
           aria-hidden
-          className="-mb-[0.18em] select-none whitespace-nowrap text-center text-[19.5vw] font-semibold leading-none tracking-[-0.06em]"
+          className="mt-2 select-none whitespace-nowrap text-center text-[19.5vw] font-semibold leading-[1.1] tracking-[-0.06em]"
         >
           rkdotxyz
         </p>
