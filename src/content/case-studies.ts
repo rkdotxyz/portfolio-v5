@@ -57,12 +57,21 @@ export const caseStudies: Record<string, CaseStudy> = {
   "esp32-led-snake": {
     summary: "Snake on a 32×8 LED matrix, played from any phone over the ESP32's own WiFi.",
     role: "Solo: hardware, firmware, controller and docs",
+    hero: { type: "video", src: "/work/esp32-led-snake/full.mp4", poster: "/work/esp32-led-snake/poster.jpg", controls: true, alt: "ESP32 LED Snake: from the Nokia original to the LED matrix" },
     status: "v2.1 · open source",
     what: "A pocket arcade: Snake on a 256-LED matrix, played from a phone browser. Join the ESP32's own WiFi, open snake.local, and the phone becomes the controller. No app, no router, one USB cable.",
     why: "A first version worked, but it never felt finished, and I couldn't have explained half of why it worked. Starting an MSc in Interactive Media Technology at KTH, coming from design and frontend engineering, I rebuilt it from scratch with one goal: understand every part, and leave a repo someone else could rebuild from.",
     how: "Ten phases, each adding one thing and ending with something visible on the matrix, each tagged in git. Hardware came first, with tiny test sketches: light one pixel, walk a dot through all 256 LEDs, map the matrix's serpentine wiring, stress-test the power. Then the game. The ESP32 runs its own WiFi access point, serves the controller page from flash, and keeps a WebSocket open to every phone: presses go in, score and game events come back. The rules module knows only a grid, a snake and a direction, so the controller, effects, colours and speed-up were all added later without touching it.",
     flow: ["Phone browser", "WiFi + WebSocket", "ESP32", "8×32 LED matrix"],
     sections: [
+      {
+        title: "The phone is the controller",
+        text: "Instead of buttons, the ESP32 hosts its own WiFi network and serves the controller: a d-pad, swipes, pause, restart and settings. There's no app to install and no router, so it works anywhere, including on university networks an ESP32 can't easily join. Between games, the snake and food colours can be picked from presets or any colour, previewed live on the matrix.",
+        media: [
+          { type: "video", src: "/work/esp32-led-snake/controller.mp4", alt: "Steering from the phone's d-pad" },
+          { type: "video", src: "/work/esp32-led-snake/colours.mp4", alt: "Picking the snake's colour on the phone" },
+        ],
+      },
       {
         title: "Designed around a power budget",
         text: "One USB cable gives the whole board roughly 500 mA; the matrix could draw 15 A fully lit. A firmware cap dims any frame that would draw more than 300 mA, and the look follows from it: a few bright pixels on a dark board, never a lit screen. The constraint shaped the design, not just the wiring.",
@@ -78,6 +87,7 @@ export const caseStudies: Record<string, CaseStudy> = {
           "Switching walls and wrap-around mid-game felt wrong, so settings only open between games.",
           "The phone never assumes a setting changed: a swatch only lights up once the ESP32 confirms it, so two phones can't disagree.",
         ],
+        media: [{ type: "video", src: "/work/esp32-led-snake/score.mp4", alt: "The crash, then the score counting up" }],
       },
       {
         title: "Problems solved",
@@ -87,6 +97,7 @@ export const caseStudies: Record<string, CaseStudy> = {
           "A module called network.h collided with the ESP32 core's Network.h, since macOS treats the two names as the same file. It became web_control.",
           "Still open: Safari has no vibration API, so on an iPhone, sound carries the feedback.",
         ],
+        media: [{ type: "video", src: "/work/esp32-led-snake/wiring.mp4", alt: "The ESP32 on the breadboard, wired to the matrix" }],
       },
     ],
     stack: ["ESP32", "WS2812B matrix", "C++ / Arduino", "FastLED", "ESP Async WebServer", "WebSockets", "Web Audio"],

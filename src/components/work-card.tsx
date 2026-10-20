@@ -159,6 +159,19 @@ export function WorkMedia({
   if (!media) return <GenerativePlaceholder seed={item.id} />;
 
   if (media.type === "youtube") return <YouTubeEmbed id={media.src} title={media.alt ?? item.title} />;
+  if (media.type === "video" && media.controls) {
+    return (
+      <video
+        src={media.src}
+        poster={media.poster}
+        controls
+        playsInline
+        preload="metadata"
+        aria-label={media.alt ?? item.title}
+        className={`absolute inset-0 h-full w-full ${fitClass}`}
+      />
+    );
+  }
   if (media.type === "video") {
     return (
       <video

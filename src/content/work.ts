@@ -15,7 +15,16 @@ export type Category = "key-project" | "side-project" | "exploration";
 
 // `youtube` media uses the video id as `src`. `aspect` (width / height) keeps
 // an image at its original proportions where it is shown uncropped.
-export type Media = { type: "image" | "video" | "youtube"; src: string; alt?: string; aspect?: number };
+// `controls` shows a video with its sound and player controls instead of a
+// silent loop, starting from `poster`.
+export type Media = {
+  type: "image" | "video" | "youtube";
+  src: string;
+  alt?: string;
+  aspect?: number;
+  controls?: boolean;
+  poster?: string;
+};
 
 export type WorkItem = {
   id: string;
@@ -60,7 +69,7 @@ export const work: WorkItem[] = [
     title: "ESP32 LED Snake",
     year: "2026",
     tags: ["physical computing", "game", "embedded web"],
-    // No footage yet: the demo video goes here once it's shared.
+    media: { type: "video", src: "/work/esp32-led-snake/cover.mp4", alt: "Snake running on the curved LED matrix" },
     x: -KEY - 24,
     y: -300,
     w: KEY,
@@ -300,6 +309,15 @@ export const work: WorkItem[] = [
     about: "Short films rendered entirely from code, frame by frame, then encoded to video.",
     tools: ["JavaScript", "Node.js"],
     x: 780, y: -150, w: EXP,
+  },
+  {
+    id: "oled-hej",
+    category: "exploration",
+    title: "Hej, KTH",
+    year: "2026",
+    about: "A small OLED screen on a breadboard, animated to say hej and announce a move to Stockholm for an MSc at KTH.",
+    media: { type: "video", src: "/work/oled-hej.mp4", alt: "An OLED screen saying Hej! and Masters in Interactive Media Technology at KTH" },
+    x: 780, y: -450, w: EXP,
   },
   {
     id: "led-matrix",
