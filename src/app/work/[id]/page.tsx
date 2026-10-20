@@ -175,6 +175,22 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
                     {study.flow && <Flow steps={study.flow} />}
                   </Block>
                 )}
+                {study.sections?.map((sec) => (
+                  <Block key={sec.title} title={sec.title}>
+                    {sec.text && <p>{sec.text}</p>}
+                    {sec.items && (
+                      <ul className={`list-disc space-y-2 pl-6 marker:text-muted ${sec.text ? "mt-4" : ""}`}>
+                        {sec.items.map((t) => (
+                          <li key={t}>{t}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {sec.flow && <Flow steps={sec.flow} />}
+                    {sec.media?.map((m) => (
+                      <BodyMedia key={m.src} media={m} item={item} caption />
+                    ))}
+                  </Block>
+                ))}
                 {study.outcome && <Block title="Outcome">{study.outcome}</Block>}
               </>
             )}
@@ -188,7 +204,7 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
             <div className="mt-6 grid gap-6 md:grid-cols-2">
               {study.gallery.map((m, i) => (
                 <figure key={m.src} className={study.gallery!.length % 2 === 1 && i === 0 ? "md:col-span-2" : ""}>
-                  <div className="relative aspect-[16/10] overflow-hidden bg-surface">
+                  <div className="relative overflow-hidden bg-surface" style={{ aspectRatio: m.aspect ?? 16 / 10 }}>
                     <WorkMedia item={{ ...item, media: m }} sizes="(min-width: 768px) 50vw, 100vw" fit="contain" />
                   </div>
                   {m.alt && <figcaption className="mt-2 text-sm text-muted">{m.alt}</figcaption>}
@@ -292,14 +308,17 @@ function Body({ blocks, item }: { blocks: BodyBlock[]; item: WorkItem }) {
   );
 }
 
-function BodyMedia({ media, item }: { media: Media; item: WorkItem }) {
+// An image at its own proportions. `caption` shows its alt text beneath it.
+function BodyMedia({ media, item, caption = false }: { media: Media; item: WorkItem; caption?: boolean }) {
   const aspect = media.type === "youtube" ? 16 / 9 : (media.aspect ?? 16 / 9);
   return (
-    <figure className="my-8">
+    <figure className="my-8 last:mb-0">
       <div className="relative overflow-hidden bg-surface" style={{ aspectRatio: aspect }}>
         <WorkMedia item={{ ...item, media }} sizes="(min-width: 768px) 768px, 100vw" fit="contain" />
       </div>
-      {media.alt && media.type !== "youtube" && <figcaption className="sr-only">{media.alt}</figcaption>}
+      {media.alt && media.type !== "youtube" && (
+        <figcaption className={caption ? "mt-2 text-sm text-muted" : "sr-only"}>{media.alt}</figcaption>
+      )}
     </figure>
   );
 }

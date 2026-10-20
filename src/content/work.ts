@@ -60,7 +60,7 @@ export const work: WorkItem[] = [
     title: "ESP32 LED Snake",
     year: "2026",
     tags: ["physical computing", "game", "embedded web"],
-    media: img(`${FRAMER}ddm6ikbkhswupc3CCIhiIEiTgHI.gif`, "An LED matrix lit up beside a laptop"),
+    // No footage yet: the demo video goes here once it's shared.
     x: -KEY - 24,
     y: -300,
     w: KEY,
@@ -97,6 +97,7 @@ export const work: WorkItem[] = [
     title: "Heart Doll",
     year: "2026",
     tags: ["soft robotics", "electronics", "tangible"],
+    media: img("/work/heart-doll/glowing-heart.jpg", "Rocky, the Heart Doll, with its heart glowing red"),
     x: 24,
     y: 20,
     w: KEY,
@@ -284,12 +285,13 @@ export const work: WorkItem[] = [
   },
   {
     id: "middventory",
-    category: "exploration",
+    category: "side-project",
     title: "Middventory",
     year: "2026",
     about: "A pixel-style map of every part in Middla Lab, and which drawer it lives in.",
     tools: ["HTML", "CSS", "JavaScript"],
-    x: -960, y: 180, w: EXP,
+    media: img("/work/middventory.jpg", "The Middventory parts grid"),
+    x: -960, y: 180, w: SIDE,
   },
   {
     id: "motion-studio",
@@ -298,5 +300,13 @@ export const work: WorkItem[] = [
     about: "Short films rendered entirely from code, frame by frame, then encoded to video.",
     tools: ["JavaScript", "Node.js"],
     x: 780, y: -150, w: EXP,
+  },
+  {
+    id: "led-matrix",
+    category: "exploration",
+    title: "LED Matrix",
+    about: "An LED matrix lit up and driven from a laptop.",
+    media: img(`${FRAMER}ddm6ikbkhswupc3CCIhiIEiTgHI.gif`, "An LED matrix lit up beside a laptop"),
+    x: 780, y: 150, w: EXP,
   },
 ];
