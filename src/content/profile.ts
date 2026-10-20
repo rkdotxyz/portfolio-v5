@@ -4,11 +4,20 @@
  * ------------------------------------------------------------------ */
 
 export const about = {
-  statement:
-    "I’m a creative technologist driven by human-centred design and a curiosity for how technology shapes experiences.",
-  body: "My work sits at the intersection of design, code and art. I craft products, systems, installations and tools that make design workflows smoother, everyday experiences simpler, and push at the edges of new-media art.",
+  statement: "I build things that live between the digital and the physical.",
+  body: [
+    "LED matrices and microcontrollers, pen plotters and projectors, data art and the code that ties them together. Mostly, I’m figuring out how technology can feel less like a screen and more like something you hold, play with and share.",
+  ],
+  // Headline numbers, counted from the work on the canvas (work.ts and the
+  // toolkit links in this file).
+  stats: [
+    { value: "50+", label: "builds and experiments since 2022" },
+    { value: "20", label: "physical builds: LEDs, plotters, microcontrollers" },
+    { value: "20", label: "creative-code pieces" },
+    { value: "2", label: "installations shown in public" },
+  ],
   facts: [
-    { label: "Now", value: "M.S. Interactive Media Technology, KTH Stockholm" },
+    { label: "Now", value: "MSc Interactive Media Technology, KTH Stockholm" },
     { label: "Before", value: "Senior Product Designer, Razorpay" },
     { label: "Based in", value: "Stockholm, Sweden" },
   ],
