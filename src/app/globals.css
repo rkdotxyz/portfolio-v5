@@ -2,6 +2,7 @@
 
 /* Dark by default: black and white only, greys for hierarchy. */
 :root {
+  --beta-h: 2.25rem; /* the beta banner under the header */
   --background: #000000;
   --foreground: #f5f5f5;
   --muted: #8a8a8a;

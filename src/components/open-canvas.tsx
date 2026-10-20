@@ -391,7 +391,7 @@ export function OpenCanvas() {
   return (
     <section
       aria-label="Open canvas"
-      className="relative h-[calc(100svh-3.5rem-3rem)] w-full overflow-clip border-b border-line sm:h-[calc(100svh-4rem-3rem)]"
+      className="relative h-[calc(100svh-3.5rem-3rem-var(--beta-h))] w-full overflow-clip border-b border-line sm:h-[calc(100svh-4rem-3rem-var(--beta-h))]"
     >
       {/* The page's heading; the canvas itself is visual. */}
       <h1 className="sr-only">Rama Krushna Behera, creative technologist: selected work</h1>

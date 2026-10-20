@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { DetectFrame } from "@/components/detect-frame";
 import { SiteFooter } from "@/components/site-footer";
+import { BetaBanner } from "@/components/beta-banner";
 import { SiteHeader } from "@/components/site-header";
 import { WorkMedia } from "@/components/work-card";
 import { caseStudies, type BodyBlock } from "@/content/case-studies";
@@ -35,6 +36,7 @@ export default function CaseStudyPage({ params }: PageProps<"/work/[id]">) {
   return (
     <>
       <SiteHeader />
+      <BetaBanner />
       <Suspense fallback={<main className="flex-1" />}>
         <CaseStudy params={params} />
       </Suspense>
