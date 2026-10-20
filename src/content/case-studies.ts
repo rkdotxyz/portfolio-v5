@@ -212,6 +212,12 @@ export const caseStudies: Record<string, CaseStudy> = {
       { kind: "media", media: { ...img(`${FRAMER}pklQGu6ZkJGpeoi9GYkDaKlsktQ.png`), aspect: 567 / 206 } },
       { kind: "media", media: { ...img(`${FRAMER}9hZjmA9PSrqvr1pNXGRN2JHzkWM.png`), aspect: 567 / 206 } },
     ],
+    // Not in the v4 write-up: photos from showing it at VizChitra 2025.
+    gallery: [
+      { ...img("/work/x/planet-vizchitra-setup.jpg", "The installation set up at VizChitra 2025"), aspect: 1 },
+      { ...img("/work/x/planet-vizchitra-controls.jpg", "The control panel: a MIDI controller mapped to the planet's parameters"), aspect: 1 },
+      { ...img("/work/x/planet-vizchitra-schedule.jpg", "The talk at VizChitra 2025: Planet Under Pressure, Designing Tools for Environmental Storytelling"), aspect: 1 },
+    ],
   },
 
   // Carried over 1:1 from the v4 case study (ramakrushna.xyz/selected-work/blade-design-system).

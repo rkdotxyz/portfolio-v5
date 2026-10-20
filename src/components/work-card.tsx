@@ -1,20 +1,15 @@
 import Image from "next/image";
-import { CATEGORY_LABEL, type Category, type WorkItem } from "@/content/work";
+import { aspectOf, CATEGORY_LABEL, type Category, type WorkItem } from "@/content/work";
 import { DetectFrame } from "./detect-frame";
 import { YouTubeEmbed } from "./youtube-embed";
-
-const ASPECT: Record<Category, string> = {
-  "key-project": "aspect-[16/10]",
-  "side-project": "aspect-[4/3]",
-  exploration: "aspect-square",
-};
-const RATIO: Record<Category, number> = { "key-project": 16 / 10, "side-project": 4 / 3, exploration: 1 };
 
 // Rendered height of a card at a given width: border, media, caption. Key
 // projects run their media edge to edge; other cards sit it in 8px padding.
 // Keep in sync with the classes below; the canvas uses it for layout and the minimap.
-export const cardHeight = (category: Category, width: number) =>
-  category === "key-project" ? 2 + (width - 2) / RATIO[category] + 40 : 2 + 16 + (width - 18) / RATIO[category] + 32;
+export const cardHeight = (item: WorkItem, width: number) =>
+  item.category === "key-project"
+    ? 2 + (width - 2) / aspectOf(item) + 40
+    : 2 + 16 + (width - 18) / aspectOf(item) + 32;
 
 const SHORT: Record<Category, string> = { "key-project": "key", "side-project": "side", exploration: "exp" };
 
@@ -41,7 +36,7 @@ export function WorkCard({
   return (
     <article data-active={active} data-sound-hover className="group relative">
       <div className={`border border-line bg-surface ${isKey ? "" : "p-2"}`}>
-        <div className={`relative overflow-hidden bg-black ${ASPECT[item.category]}`}>
+        <div className="relative overflow-hidden bg-black" style={{ aspectRatio: aspectOf(item) }}>
           {isKey ? (
             <>
               {/* Hover: the media wakes up and a scan line sweeps down and back
@@ -61,6 +56,11 @@ export function WorkCard({
           ) : (
             <WorkMedia item={item} />
           )}
+          {item.wip && (
+            <span className="absolute left-2 top-2 bg-foreground px-1.5 py-1 font-mono text-[10px] uppercase leading-none tracking-wider text-background">
+              In progress
+            </span>
+          )}
         </div>
         <div className={`flex items-center justify-between gap-2 ${isKey ? "h-10 px-3" : "h-8 px-1 pt-1"}`}>
           <h3 className={`truncate ${isKey ? "text-base" : "text-sm"}`}>{item.title}</h3>
@@ -71,7 +71,10 @@ export function WorkCard({
                 <span className="hidden text-foreground group-hover:inline">View case study →</span>
               </>
             ) : (
-              (item.year ?? SHORT[item.category])
+              <>
+                {item.url && <span className="mr-1.5 text-foreground">↗</span>}
+                {item.year ?? SHORT[item.category]}
+              </>
             )}
           </span>
         </div>
@@ -133,13 +136,21 @@ function Callout({ item, direction, scale }: { item: WorkItem; direction: Callou
           transform: "translateY(-50%)",
         }}
       >
-        <p className="bg-foreground px-2 py-[5px] font-mono text-[13px] leading-none text-background">{item.title}</p>
+        <p className="flex justify-between gap-3 bg-foreground px-2 py-[5px] font-mono text-[13px] leading-none text-background">
+          <span>{item.title}</span>
+          {item.wip && <span className="opacity-60">in progress</span>}
+        </p>
         <p className="px-3 pt-2.5 text-[13px] leading-snug">{item.about}</p>
-        {item.tools && item.tools.length > 0 ? (
-          <p className="px-3 pb-2.5 pt-2 font-mono text-[11px] leading-snug text-muted">{item.tools.join(" · ")}</p>
-        ) : (
-          <div className="h-2.5" />
+        {item.tools && item.tools.length > 0 && (
+          <p className="px-3 pt-2 font-mono text-[11px] leading-snug text-muted">{item.tools.join(" · ")}</p>
         )}
+        {item.url && (
+          <p className="mx-3 mt-2.5 truncate border-t border-line pt-2 font-mono text-[11px] leading-snug">
+            ↗ {item.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
+            <span className="text-muted"> · click to visit</span>
+          </p>
+        )}
+        <div className="h-2.5" />
       </div>
     </div>
   );

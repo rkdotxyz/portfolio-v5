@@ -201,9 +201,13 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
         {study.gallery && study.gallery.length > 0 && (
           <section className="mt-20 sm:mt-28">
             <h2 className="font-mono text-[11px] uppercase tracking-wider text-muted">Gallery</h2>
-            <div className="mt-6 grid gap-6 md:grid-cols-2">
+            {/* Three across for three; otherwise two across, with an odd first one spanning both. */}
+            <div className={`mt-6 grid gap-6 ${study.gallery.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
               {study.gallery.map((m, i) => (
-                <figure key={m.src} className={study.gallery!.length % 2 === 1 && i === 0 ? "md:col-span-2" : ""}>
+                <figure
+                  key={m.src}
+                  className={study.gallery!.length % 2 === 1 && study.gallery!.length !== 3 && i === 0 ? "md:col-span-2" : ""}
+                >
                   <div className="relative overflow-hidden bg-surface" style={{ aspectRatio: m.aspect ?? 16 / 10 }}>
                     <WorkMedia item={{ ...item, media: m }} sizes="(min-width: 768px) 50vw, 100vw" fit="contain" />
                   </div>

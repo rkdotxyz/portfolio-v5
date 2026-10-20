@@ -10,7 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { work, type Category } from "@/content/work";
+import { widthOf, work, type Category } from "@/content/work";
+import { pack } from "@/lib/pack";
 import { play, type SoundName } from "@/lib/sound";
 import { CanvasFilter, CATEGORIES } from "./canvas-filter";
 import { CanvasMinimap, type Rect } from "./canvas-minimap";
@@ -35,10 +36,22 @@ const MINIMAP_ZOOM = 1.15;
 const ALL = new Set<Category>(CATEGORIES.map((c) => c.id));
 const CATEGORY_ORDER: Category[] = ["key-project", "side-project", "exploration"];
 
-// Every draggable thing on the canvas, with its scattered starting position.
+// Every draggable thing on the canvas, with its scattered starting position:
+// key projects where work.ts puts them, everything else packed around them.
+const NOTE_WIDTH = 170;
+const KEYS = work.filter((w) => w.category === "key-project");
+const keyRects = KEYS.map((w) => ({ x: w.x ?? 0, y: w.y ?? 0, w: widthOf(w), h: cardHeight(w, widthOf(w)) }));
+const packed = pack(
+  keyRects,
+  [
+    { id: "note", w: NOTE_WIDTH, h: NOTE_HEIGHT },
+    ...work.filter((w) => w.category !== "key-project").map((w) => ({ id: w.id, w: widthOf(w), h: cardHeight(w, widthOf(w)) })),
+  ],
+  { gap: 28, top: 28, stretch: 1.6, snap: 4 },
+);
 const ITEMS: { id: string; x: number; y: number; w: number }[] = [
-  { id: "note", x: -440, y: 330, w: 170 },
-  ...work.map(({ id, x, y, w }) => ({ id, x, y, w })),
+  { id: "note", ...packed.note, w: NOTE_WIDTH },
+  ...work.map((w) => ({ id: w.id, ...(w.x !== undefined && w.y !== undefined ? { x: w.x, y: w.y } : packed[w.id]), w: widthOf(w) })),
 ];
 const itemById = new Map(ITEMS.map((i) => [i.id, i]));
 const workById = new Map(work.map((w) => [w.id, w]));
@@ -69,7 +82,7 @@ function masonry(cols: number, shown: Set<Category>) {
   const keys = work.filter((w) => w.category === "key-project" && shown.has(w.category));
   keys.forEach((w, i) => {
     positions[w.id] = { x: x0 + (i % perRow) * (keyWidth + GAP), y };
-    if (i % perRow === perRow - 1 || i === keys.length - 1) y += cardHeight(w.category, keyWidth) + LABEL_ROOM;
+    if (i % perRow === perRow - 1 || i === keys.length - 1) y += cardHeight(w, keyWidth) + LABEL_ROOM;
   });
 
   const colY = Array<number>(cols).fill(y);
@@ -79,7 +92,7 @@ function masonry(cols: number, shown: Set<Category>) {
   for (const w of rest) {
     const c = colY.indexOf(Math.min(...colY));
     positions[w.id] = { x: x0 + c * (COL + GAP), y: colY[c] };
-    colY[c] += cardHeight(w.category, COL) + GAP;
+    colY[c] += cardHeight(w, COL) + GAP;
   }
   return { positions, width: total, keyWidth };
 }
@@ -112,11 +125,17 @@ export function OpenCanvas() {
   const tap = useRef<{ start: Point; moved: boolean } | null>(null);
   const router = useRouter();
 
-  // Key projects open their case study; other cards toggle their callout.
-  const openProject = (id: string) => {
-    if (workById.get(id)?.category === "key-project") {
+  // Key projects open their case study. Other cards with a live site open it
+  // in a new tab: straight away with a mouse, or on a second tap on touch,
+  // where the first tap shows the callout. The rest toggle their callout.
+  const openProject = (id: string, pointerType = "mouse") => {
+    const w = workById.get(id);
+    if (w?.category === "key-project") {
       play("open");
       router.push(`/work/${id}`);
+    } else if (w?.url && (pointerType === "mouse" || pinnedId === id)) {
+      play("open");
+      window.open(w.url, "_blank", "noopener,noreferrer");
     } else {
       play("click");
       setPinnedId((p) => (p === id ? null : id));
@@ -249,7 +268,7 @@ export function OpenCanvas() {
     // layout aren't draggable, so their clicks arrive here).
     if (tap.current && !tap.current.moved && pointers.current.size === 0) {
       const card = document.elementFromPoint(e.clientX, e.clientY)?.closest<HTMLElement>("[data-work-id]");
-      if (card?.dataset.workId) openProject(card.dataset.workId);
+      if (card?.dataset.workId) openProject(card.dataset.workId, e.pointerType);
       else setPinnedId(null);
     }
     tap.current = null;
@@ -283,7 +302,7 @@ export function OpenCanvas() {
     drag.current = null;
     setActiveId(null);
     if (d.moved) play("drop");
-    else if (workById.has(d.id)) openProject(d.id);
+    else if (workById.has(d.id)) openProject(d.id, e.pointerType);
   };
 
   const center = (): Point => ({ x: size.w / 2, y: size.h / 2 });
@@ -329,7 +348,7 @@ export function OpenCanvas() {
     const visible = w ? shown.has(w.category) : !(inGrid && id === "note");
     const pos = inGrid && grid.positions[id] ? grid.positions[id] : positions[id];
     const width = inGrid && w ? (w.category === "key-project" ? grid.keyWidth : COL) : item.w;
-    const height = w ? cardHeight(w.category, width) : NOTE_HEIGHT;
+    const height = w ? cardHeight(w, width) : NOTE_HEIGHT;
     return { id, w, visible, pos, width, height };
   });
 
@@ -390,7 +409,7 @@ export function OpenCanvas() {
                 onPointerCancel={draggable ? onCardUp : undefined}
                 className={`absolute hover:z-30 ${pinned ? "z-30" : ""} ${
                   animating ? ease : "transition-opacity duration-300"
-                } ${draggable ? "cursor-move touch-none" : isKey ? "cursor-pointer" : ""} ${visible ? "" : hidden}`}
+                } ${draggable ? "cursor-move touch-none" : isKey || w?.url ? "cursor-pointer" : ""} ${visible ? "" : hidden}`}
                 style={{ left: pos.x, top: pos.y, width }}
               >
                 {w ? (

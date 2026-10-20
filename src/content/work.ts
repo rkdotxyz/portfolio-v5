@@ -2,10 +2,17 @@
  *  Work shown on the open canvas.
  *
  *  `media` is the card's image or video:
- *    media: { type: "image", src: "/work/gesture-bloom.jpg" }   // jpg, png, webp, gif, svg
- *    media: { type: "video", src: "/work/gesture-bloom.mp4" }   // mp4/webm, plays muted on loop
- *  Local files go in /public/work. Remote URLs need their host listed in
- *  next.config.ts. Without `media`, the card shows a generative placeholder.
+ *    media: pic("/work/x/cad.jpg", "alt", 1.6)     // jpg, png, webp, gif, svg
+ *    media: vid("/work/x/shader.mp4", "alt", 1)    // mp4/webm, plays muted on loop
+ *  The last number is the media's width / height: cards take the shape of
+ *  their media, so the canvas mixes square, tall and wide cards. Without it
+ *  a card uses its category's default shape. Local files go in /public/work;
+ *  remote URLs need their host listed in next.config.ts. Without `media`,
+ *  the card shows a generative placeholder.
+ *
+ *  Key projects sit at fixed positions in the middle. Everything else is
+ *  packed around them in list order (see lib/pack.ts), so earlier items land
+ *  closer to the centre.
  *
  *  `id` is the key project's URL slug (/work/<id>) and the key for its case
  *  study in case-studies.ts.
@@ -38,10 +45,15 @@ export type WorkItem = {
   // and what it was made with. (Key projects have a case study page instead.)
   about?: string;
   tools?: string[];
-  // World position on the canvas (top-left corner) and card width, in px.
-  x: number;
-  y: number;
-  w: number;
+  // A live site or listing: clicking the card opens it in a new tab.
+  url?: string;
+  // Not finished yet: the card says so.
+  wip?: boolean;
+  // Key projects: world position on the canvas (top-left corner), in px.
+  x?: number;
+  y?: number;
+  // Card width in world px. Defaults to one that suits the media's shape.
+  w?: number;
 };
 
 export const CATEGORY_LABEL: Record<Category, string> = {
@@ -55,11 +67,31 @@ export const FRAMER = "https://framerusercontent.com/images/";
 export const GITHUB = "https://raw.githubusercontent.com/rkdotxyz/";
 
 export const img = (src: string, alt?: string): Media => ({ type: "image", src, alt });
+export const pic = (src: string, alt: string, aspect?: number): Media => ({ type: "image", src, alt, aspect });
+export const vid = (src: string, alt: string, aspect?: number): Media => ({ type: "video", src, alt, aspect });
 
-// Card widths per category, in world px.
+const X = "/work/x/";
+
+// Key project card width, in world px.
 const KEY = 360;
-const SIDE = 220;
-const EXP = 180;
+
+// Default media shape (width / height) per category.
+export const DEFAULT_ASPECT: Record<Category, number> = { "key-project": 16 / 10, "side-project": 4 / 3, exploration: 1 };
+
+// The shape of a card's media: key projects keep one shape so the cluster
+// stays a grid; everything else follows its media.
+export const aspectOf = (item: WorkItem) =>
+  item.category === "key-project" ? DEFAULT_ASPECT[item.category] : (item.media?.aspect ?? DEFAULT_ASPECT[item.category]);
+
+// Wide media gets a wider card and tall media a narrower one, so cards hold
+// roughly similar areas. Side projects run a little larger than explorations.
+export function widthOf(item: WorkItem) {
+  if (item.w) return item.w;
+  if (item.category === "key-project") return KEY;
+  const a = aspectOf(item);
+  const base = a >= 2 ? 300 : a >= 1.5 ? 250 : a >= 1.15 ? 220 : a >= 0.95 ? 190 : a >= 0.75 ? 170 : 150;
+  return base + (item.category === "side-project" ? 20 : 0);
+}
 
 export const work: WorkItem[] = [
   // Key projects: a 2×2 cluster at the centre of the canvas.
@@ -112,219 +144,52 @@ export const work: WorkItem[] = [
     w: KEY,
   },
 
-  // Ring around the cluster, media-rich work closest in.
-  // Top row
-  {
-    id: "projection-mapping",
-    category: "exploration",
-    title: "Projection Mapping",
-    about: "Visuals projection-mapped onto physical objects.",
-    media: img(`${FRAMER}1kvOIZy1UJFdiTUTeIkoV4kEpwU.gif`, "Visuals projection-mapped onto boxes"),
-    x: -700, y: -640, w: EXP,
-  },
-  {
-    id: "mystic-designs",
-    category: "side-project",
-    title: "Mystic Designs",
-    about: "A newsletter curating real-world tangible UI: products that redefine how tangible interfaces work.",
-    tools: ["Substack"],
-    media: img("/work/mystic-designs.jpg", "The Mystic Designs newsletter archive"),
-    x: -470, y: -640, w: SIDE,
-  },
-  {
-    id: "shader",
-    category: "exploration",
-    title: "Shader",
-    about: "Colour and motion from a shader.",
-    media: img(`${FRAMER}DO3mYijHrDZGuzgr1gna9uLGaHo.gif`, "Flowing shader colour bands"),
-    x: -200, y: -640, w: EXP,
-  },
-  {
-    id: "keyscout",
-    category: "side-project",
-    title: "KeyScout",
-    year: "2025",
-    about: "A Figma plugin that finds the keys and IDs of components, styles and variables, and exports them as JSON, CSV, TXT or TypeScript.",
-    tools: ["Figma plugin API", "JavaScript"],
-    media: img("/work/keyscout.jpg", "KeyScout on Figma Community"),
-    x: 30, y: -640, w: SIDE,
-  },
-  {
-    id: "midi-controller",
-    category: "exploration",
-    title: "MIDI Controller",
-    about: "Visuals played live with a MIDI controller.",
-    media: img(`${FRAMER}sFlrG9ptSIgjdMPW5PTVfsbuaPM.gif`, "Visuals driven by a MIDI controller"),
-    x: 300, y: -640, w: EXP,
-  },
-  {
-    id: "light-painting",
-    category: "exploration",
-    title: "Light Painting",
-    about: "Drawing with light.",
-    media: img(`${FRAMER}oWQOJPIs0pZLGlql5qlXAjOlvW8.gif`, "A light trail drawn in the dark"),
-    x: 540, y: -640, w: EXP,
-  },
-
-  // Left column
-  {
-    id: "pen-plotter",
-    category: "exploration",
-    title: "Pen Plotter",
-    year: "2022–",
-    about: "Pushing a pen plotter beyond pen and paper: UV ink, an LED, pencil, brush and calligraphy pens, one medium per plot.",
-    tools: ["TouchDesigner", "p5.js", "QGIS"],
-    media: img(`${FRAMER}lVyFtm0Ztev0RVnv1832OAAdKvM.png`, "Plotted artworks in different mediums"),
-    x: -660, y: -360, w: EXP,
-  },
-  {
-    id: "healthicons",
-    category: "side-project",
-    title: "Healthicons",
-    about: "Free, open-source health icons in the public domain, made with a team of volunteer designers.",
-    media: img("/work/healthicons.jpg", "The Healthicons library"),
-    x: -700, y: -100, w: SIDE,
-  },
-  {
-    id: "audio-reactive",
-    category: "exploration",
-    title: "Audio Reactive",
-    about: "Visuals that move with sound.",
-    media: img(`${FRAMER}VD3Y9czXbRsExpkUTPAAzDSQ7hY.gif`, "Visuals reacting to sound"),
-    x: -660, y: 150, w: EXP,
-  },
-
-  // Right column
-  {
-    id: "stratosplash",
-    category: "side-project",
-    title: "Stratosplash",
-    about: "Gradients captured from real skies, real moments and real places, collected in one place.",
-    tools: ["Framer"],
-    media: img("/work/stratosplash.jpg", "The Stratosplash site"),
-    x: 480, y: -360, w: SIDE,
-  },
-  {
-    id: "generative-music",
-    category: "exploration",
-    title: "Generative Music",
-    about: "Music generated from code.",
-    media: img(`${FRAMER}ssF2EBws3Q9SoKkiiiNnqRDO3Zk.gif`, "Live-coded generative music"),
-    x: 500, y: -100, w: EXP,
-  },
-  {
-    id: "pattern-creator",
-    category: "side-project",
-    title: "Pattern Creator",
-    about: "A Figma plugin, built for Blade at Razorpay, that makes the system's UI patterns easy to find and use. About 70% time saved.",
-    tools: ["Figma plugin API", "Amplitude"],
-    media: img(`${GITHUB}pattern-creator-plugin-images/main/Dashboard%20UI%20-%20Desktop.png`, "A dashboard pattern generated by the plugin"),
-    x: 480, y: 150, w: SIDE,
-  },
-
-  // Bottom row
-  {
-    id: "typography",
-    category: "exploration",
-    title: "Typography",
-    about: "Letterforms in motion.",
-    media: img(`${FRAMER}PfMZ22AeOAugh6aFxtL0gmS4Xo.gif`, "Animated letterform"),
-    x: -700, y: 420, w: EXP,
-  },
-  {
-    id: "scenic-seats",
-    category: "side-project",
-    title: "Scenic Seats",
-    about: "Which side of the plane to sit on for the sunrise, the sunset or the view, across 198 Indian domestic routes.",
-    x: -470, y: 420, w: SIDE,
-  },
-  {
-    id: "gesture-bloom",
-    category: "exploration",
-    title: "Gesture Bloom",
-    year: "2026",
-    about: "A paper flower that opens with your hand. MediaPipe tracks the hand in the browser; a servo pulls the petals.",
-    tools: ["MediaPipe", "Web Serial", "Arduino"],
-    x: -200, y: 420, w: EXP,
-  },
-  {
-    id: "sonic-signature",
-    category: "exploration",
-    title: "Sonic Signature",
-    year: "2025",
-    about: "Draw a shape or sign your name, and hear it as its own composition.",
-    tools: ["TypeScript"],
-    x: 30, y: 420, w: EXP,
-  },
-  {
-    id: "projection-ttt",
-    category: "exploration",
-    title: "Projection TTT",
-    about: "Tic-tac-toe projected onto a surface and played with your hands, tracked by a webcam.",
-    x: 270, y: 420, w: EXP,
-  },
-  {
-    id: "force-field",
-    category: "exploration",
-    title: "Force Field",
-    year: "2025",
-    about: "A grid of circles that bends around your cursor, with live controls for attraction, density and strength.",
-    tools: ["TypeScript"],
-    x: 510, y: 420, w: EXP,
-  },
-
-  // Outer edges
-  {
-    id: "pixel-art-generator",
-    category: "exploration",
-    title: "Pixel Art Generator",
-    year: "2025",
-    about: "Turns any image into pixel art, with adjustable pixel size and colour palettes.",
-    tools: ["TypeScript"],
-    x: -960, y: -480, w: EXP,
-  },
-  {
-    id: "language-of-gen-z",
-    category: "exploration",
-    title: "Language of Gen Z",
-    year: "2025",
-    about: "An interactive word cloud of Gen Z slang and emojis. Hover any word for its meaning.",
-    tools: ["D3.js"],
-    x: -960, y: -150, w: EXP,
-  },
-  {
-    id: "middventory",
-    category: "side-project",
-    title: "Middventory",
-    year: "2026",
-    about: "A pixel-style map of every part in Middla Lab, and which drawer it lives in.",
-    tools: ["HTML", "CSS", "JavaScript"],
-    media: img("/work/middventory.jpg", "The Middventory parts grid"),
-    x: -960, y: 180, w: SIDE,
-  },
-  {
-    id: "motion-studio",
-    category: "exploration",
-    title: "Motion Studio",
-    about: "Short films rendered entirely from code, frame by frame, then encoded to video.",
-    tools: ["JavaScript", "Node.js"],
-    x: 780, y: -150, w: EXP,
-  },
-  {
-    id: "oled-hej",
-    category: "exploration",
-    title: "Hej, KTH",
-    year: "2026",
-    about: "A small OLED screen on a breadboard, animated to say hej and announce a move to Stockholm for an MSc at KTH.",
-    media: { type: "video", src: "/work/oled-hej.mp4", alt: "An OLED screen saying Hej! and Masters in Interactive Media Technology at KTH" },
-    x: 780, y: -450, w: EXP,
-  },
-  {
-    id: "led-matrix",
-    category: "exploration",
-    title: "LED Matrix",
-    about: "An LED matrix lit up and driven from a laptop.",
-    media: img(`${FRAMER}ddm6ikbkhswupc3CCIhiIEiTgHI.gif`, "An LED matrix lit up beside a laptop"),
-    x: 780, y: 150, w: EXP,
-  },
+  // Everything else, nearest the centre first.
+  { id: "led-mapping", category: "exploration", title: "LED Mapping", year: "2025", about: "Visuals mapped onto a curved LED matrix, one colour wash at a time.", media: vid(`${X}led-mapping.mp4`, "Colour washing across a curved LED matrix", 540 / 720) },
+  { id: "pattern-creator", category: "side-project", title: "Pattern Creator", about: "A Figma plugin, built for Blade at Razorpay, that makes the system's UI patterns easy to find and use. About 70% time saved.", tools: ["Figma plugin API", "Amplitude"], media: vid(`${X}pattern-creator.mp4`, "Generating a page from a UI pattern in Figma", 1310 / 1039) },
+  { id: "conclave", category: "exploration", title: "Design Conclave Installation", year: "2025", about: "My first installation, built for the Razorpay Design Conclave: visitors on a big screen, glitched in real time.", media: vid(`${X}conclave.mp4`, "Visitors on a screen, glitching", 4 / 3) },
+  { id: "pen-plotter", category: "exploration", title: "Pen Plotter Experiments", year: "2022–", about: "Pushing a pen plotter beyond pen and paper: UV ink, an LED, pencil, brush and calligraphy pens, one medium per plot.", tools: ["TouchDesigner", "p5.js", "QGIS"], media: vid(`${X}pen-plotter.mp4`, "The plotter drawing curves in blue and red", 0.8) },
+  { id: "token-visualiser", category: "side-project", title: "Blade Token Visualiser", year: "2025", about: "A tool that maps Blade's global colour tokens to the semantic tokens that use them.", media: vid(`${X}token-visualiser.mp4`, "Lines linking global and semantic colour tokens", 720 / 524) },
+  { id: "shader", category: "exploration", title: "Shader Art", year: "2025", about: "A kaleidoscopic shader, cycling through colours.", media: vid(`${X}shader.mp4`, "A kaleidoscopic shader cycling through colours", 1) },
+  { id: "oled-art", category: "exploration", title: "OLED Generative Art", year: "2026", about: "Generative art on a 0.96-inch OLED screen, driven by an Arduino.", tools: ["Arduino"], media: vid(`${X}oled-art.mp4`, "Generative patterns on a tiny OLED on a breadboard", 16 / 9) },
+  { id: "shader-bands", category: "exploration", title: "Shader", about: "Flowing bands of colour from a shader.", media: img(`${FRAMER}DO3mYijHrDZGuzgr1gna9uLGaHo.gif`, "Flowing shader colour bands") },
+  { id: "mystic-designs", category: "side-project", title: "Mystic Designs", about: "A newsletter curating real-world tangible UI: products that redefine how tangible interfaces work.", tools: ["Substack"], media: vid(`${X}mystic-designs-site.mp4`, "Scrolling the Mystic Designs archive", 4 / 3), url: "https://www.mysticdesigns.xyz" },
+  { id: "audio-reactive", category: "exploration", title: "Audio Reactive", year: "2025", about: "LEDs that pulse and change colour with the music.", media: vid(`${X}audio-reactive.mp4`, "A red LED matrix with green bars jumping to sound", 16 / 9) },
+  { id: "light-plot", category: "exploration", title: "Plots in Changing Light", year: "2025", about: "A two-colour plot that changes with the light: under blue light the blue lines vanish, under red the red ones do.", tools: ["Pen plotter"], media: pic(`${X}light-plot.jpg`, "The same plot under white, blue and red light", 1212 / 600) },
+  { id: "projection-mapping", category: "exploration", title: "Projection Mapping", year: "2025–26", about: "Visuals projection-mapped onto physical objects, as a numbered series of experiments.", media: vid(`${X}projection-mapping.mp4`, "Colourful noise projected onto a book and boxes", 1) },
+  { id: "coral-dreams", category: "exploration", title: "Coral Dreams", year: "2026", about: "Gesture-controlled artwork inspired by a trip to the Andaman Islands: your hands move through a 3D coral reef.", tools: ["TouchDesigner"], media: vid(`${X}coral-dreams.mp4`, "A 3D coral reef moving with hand gestures, with the webcam view in the corner", 720 / 406) },
+  { id: "framer-components", category: "exploration", title: "Framer Components", year: "2025", about: "Concepts prototyped in Google AI Studio, rebuilt as custom Framer components: a photo turned into dots that scatter around the cursor.", tools: ["Google AI Studio", "Framer"], media: vid(`${X}framer-components.mp4`, "A portrait made of dots, scattering", 720 / 422) },
+  { id: "live-camera-led", category: "exploration", title: "Live Camera × LEDs", year: "2025", about: "A live camera feed, reduced to a few pixels and mapped onto the LED matrix.", media: vid(`${X}live-camera-led.mp4`, "A silhouette in blue on a red LED matrix", 4 / 3) },
+  { id: "healthicons", category: "side-project", title: "Healthicons", about: "Free, open-source health icons in the public domain, made with a team of volunteer designers.", media: pic("/work/healthicons.jpg", "The Healthicons library", 4 / 3), url: "https://healthicons.org" },
+  { id: "uv-maze", category: "exploration", title: "UV Ink Maze", year: "2025", about: "A plotted maze in UV ink: plain on paper, glowing under UV light.", tools: ["Pen plotter"], media: pic(`${X}uv-maze.jpg`, "A circular maze, in daylight and under UV", 2 / 3) },
+  { id: "force-field", category: "exploration", title: "Force Field", year: "2025", about: "A grid of circles that bends around your cursor, with live controls for attraction, density and strength.", tools: ["TypeScript"], media: vid(`${X}force-field.mp4`, "A dot grid warping around the cursor", 720 / 616), url: "https://force-field-jade.vercel.app" },
+  { id: "project-explorer", category: "exploration", title: "Project Explorer", year: "2025", about: "Ways to show different kinds of projects for the v4 site: a treemap and a sunburst of design, code and art.", media: vid(`${X}project-explorer.mp4`, "A treemap of projects turning into a sunburst", 720 / 608) },
+  { id: "keyscout", category: "side-project", title: "KeyScout", year: "2025", about: "A Figma plugin that finds the keys and IDs of components, styles and variables, and exports them as JSON, CSV, TXT or TypeScript.", tools: ["Figma plugin API", "JavaScript"], media: pic("/work/keyscout.jpg", "KeyScout on Figma Community", 4 / 3), url: "https://www.figma.com/community/plugin/1537879434431017434/keyscout" },
+  { id: "projection-car", category: "exploration", title: "Projection on a Toy Car", year: "2026", about: "Projection mapping onto a toy car, from the numbered series of experiments.", media: vid(`${X}projection-car.mp4`, "Light projected onto a toy car in the dark", 720 / 328) },
+  { id: "ascii-plots", category: "exploration", title: "ASCII Plots", year: "2025", about: "Images rebuilt from ASCII characters, then pen-plotted and framed.", tools: ["Pen plotter"], media: pic(`${X}ascii-plots.jpg`, "A framed green ASCII plot", 0.8) },
+  { id: "stratosplash", category: "side-project", title: "Stratosplash", year: "2025", about: "Gradients captured from real skies, real moments and real places, collected in one place.", tools: ["Framer"], media: vid(`${X}stratosplash-site.mp4`, "Scrolling the Stratosplash gradients", 4 / 3), url: "https://stratosplash.framer.website" },
+  { id: "midi-controller", category: "exploration", title: "MIDI Controller", year: "2025", about: "Visuals played live with a MIDI controller.", media: vid(`${X}midi-controller.mp4`, "Visuals changing as MIDI knobs turn", 720 / 552) },
+  { id: "mapbox", category: "exploration", title: "Map Visualisations", year: "2026", about: "Simple map visualisations from open-source data, styled in Mapbox.", tools: ["Mapbox"], media: pic(`${X}mapbox.jpg`, "Points along India's coast on a dark map", 1) },
+  { id: "toefl-practice", category: "side-project", title: "TOEFL Practice", year: "2025", about: "Built for a friend to practise TOEFL speaking and writing: Gemini writes the questions and evaluates the answers.", tools: ["Google AI Studio", "Gemini API"], media: vid(`${X}toefl-practice.mp4`, "A TOEFL practice question and its rubric", 16 / 9) },
+  { id: "photo-td", category: "exploration", title: "Glitched Landscapes", year: "2025", about: "Landscape photos pulled apart into motion: photography mixed with real-time visuals.", media: vid(`${X}photo-td.mp4`, "A cloudscape smearing into streaks", 0.8) },
+  { id: "sonic-signature", category: "exploration", title: "Sonic Signature", year: "2025", about: "Draw a shape or sign your name, and hear it as its own composition.", tools: ["TypeScript"], media: vid(`${X}sonic-signature.mp4`, "A smiling face drawn on the canvas", 720 / 606), url: "https://sonic-signature.vercel.app" },
+  { id: "not-my-hometown", category: "exploration", title: "Not My Hometown", year: "2026", about: "Low-key filmmaking: a short film about finding your way around Stockholm.", media: vid(`${X}not-my-hometown.mp4`, "A hot air balloon over Stockholm, with a title", 2.4) },
+  { id: "middventory", category: "side-project", title: "Middventory", year: "2026", about: "A pixel-style map of every part in Middla Lab, and which drawer it lives in.", tools: ["HTML", "CSS", "JavaScript"], media: pic("/work/middventory.jpg", "The Middventory parts grid", 4 / 3), url: "https://middventory-w9yd.vercel.app" },
+  { id: "pixel-art-generator", category: "exploration", title: "Pixel Art Generator", year: "2025", about: "Turns any image into pixel art, with adjustable pixel size and colour palettes.", tools: ["TypeScript"], media: vid(`${X}pixel-art-generator.mp4`, "A mountain photo turning into pixels", 720 / 608), url: "https://pixel-art-generator-lilac.vercel.app" },
+  { id: "oled-hej", category: "exploration", title: "Hej, KTH", year: "2026", about: "A small OLED screen on a breadboard, animated to say hej and announce a move to Stockholm for an MSc at KTH.", media: vid("/work/oled-hej.mp4", "An OLED screen saying Hej! and Masters in Interactive Media Technology at KTH", 16 / 9) },
+  { id: "lightscape-plants", category: "exploration", title: "Lightscape: Plants", year: "2023", about: "Genuary 2023, day 9: a generative tree drawn in light by the plotter and caught as a long exposure.", tools: ["p5.js", "Pen plotter"], media: pic(`${X}lightscape-plants.jpg`, "A green tree drawn in light", 1) },
+  { id: "data-art", category: "exploration", title: "Data Art Prints", year: "2026", about: "Abstract art from open datasets, printed as cards.", media: pic(`${X}data-art.jpg`, "A printed card with a network of points", 0.75) },
+  { id: "lenscribe", category: "side-project", title: "Lenscribe", year: "2025", about: "A custom GPT that writes tags and descriptions for photos before they go on Unsplash.", tools: ["OpenAI GPTs"], media: vid(`${X}lenscribe.mp4`, "Lenscribe describing a photo", 720 / 542) },
+  { id: "light-painting", category: "exploration", title: "Light Painting", year: "2025", about: "Drawing with light, traced live on screen.", media: vid(`${X}light-painting.mp4`, "A light trail drawn on screen", 1) },
+  { id: "site-hero", category: "exploration", title: "v4 Hero", year: "2025", about: "A glitchy, browser-heavy hero made while building the v4 site.", media: vid(`${X}site-hero.mp4`, "Glitching RKDOTDESIGN letters", 2) },
+  { id: "language-of-gen-z", category: "exploration", title: "Language of Gen Z", year: "2025", about: "An interactive word cloud of Gen Z slang and emojis. Hover any word for its meaning.", tools: ["D3.js"], media: vid(`${X}language-of-gen-z.mp4`, "A word cloud of Gen Z slang", 16 / 9), url: "https://the-language-of-gen-z.vercel.app" },
+  { id: "claude-video", category: "exploration", title: "Video with Claude", year: "2026", about: "Early experiments generating video with Claude, from data pulled from my website and GitHub.", tools: ["Claude"], media: vid(`${X}claude-video.mp4`, "A generated slide about Blade, with gauges", 16 / 9) },
+  { id: "led-matrix", category: "exploration", title: "LED Matrix", about: "An LED matrix lit up and driven from a laptop.", media: img(`${FRAMER}ddm6ikbkhswupc3CCIhiIEiTgHI.gif`, "An LED matrix lit up beside a laptop") },
+  { id: "lightscape-steal", category: "exploration", title: "Lightscape: Steal Like an Artist", year: "2023", about: "Genuary 2023, day 6: geometric shapes drawn in green light by the plotter, as a long exposure.", tools: ["p5.js", "Pen plotter"], media: pic(`${X}lightscape-steal-like-an-artist.jpg`, "Green triangles drawn in light", 1) },
+  { id: "cad", category: "exploration", title: "CAD Basics", year: "2026", about: "Back to CAD basics in Fusion: a brick, a bottle and a paper clip.", tools: ["Fusion"], media: pic(`${X}cad.jpg`, "A brick modelled in Fusion", 1.6) },
+  { id: "generative-music", category: "exploration", title: "Generative Music", about: "Music generated from code.", media: img(`${FRAMER}ssF2EBws3Q9SoKkiiiNnqRDO3Zk.gif`, "Live-coded generative music") },
+  { id: "scenic-seats", category: "side-project", title: "Scenic Seats", about: "Which side of the plane to sit on for the sunrise, the sunset or the view, across 198 Indian domestic routes.", media: pic(`${X}scenic-seats.jpg`, "The Scenic Seats route picker", 4 / 3), url: "https://scenic-seats.vercel.app" },
+  { id: "typography", category: "exploration", title: "Typography", about: "Letterforms in motion.", media: img(`${FRAMER}PfMZ22AeOAugh6aFxtL0gmS4Xo.gif`, "Animated letterform") },
+  { id: "gesture-bloom", category: "exploration", title: "Gesture Bloom", year: "2026", about: "A paper flower that opens with your hand. MediaPipe tracks the hand in the browser; a servo pulls the petals.", tools: ["MediaPipe", "Web Serial", "Arduino"], wip: true },
+  { id: "projection-ttt", category: "exploration", title: "Projection TTT", about: "Tic-tac-toe projected onto a surface and played with your hands, tracked by a webcam.", wip: true },
 ];
