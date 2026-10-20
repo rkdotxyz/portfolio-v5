@@ -6,8 +6,8 @@ import { DetectFrame } from "@/components/detect-frame";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { WorkMedia } from "@/components/work-card";
-import { caseStudies, placeholderCaseStudy } from "@/content/case-studies";
-import { CATEGORY_LABEL, work } from "@/content/work";
+import { caseStudies, placeholderCaseStudy, type BodyBlock } from "@/content/case-studies";
+import { CATEGORY_LABEL, work, type Media } from "@/content/work";
 
 // One page per project, prerendered at build time.
 export function generateStaticParams() {
@@ -50,6 +50,7 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
   const study = caseStudies[id] ?? placeholderCaseStudy;
   const isDraft = !caseStudies[id];
   const labels = item.tags ?? [CATEGORY_LABEL[item.category]];
+  const hero = study.hero ?? item.media;
 
   const meta = [
     ["Year", item.year],
@@ -85,18 +86,32 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
 
         {/* Title */}
         <header className="max-w-4xl">
-          <h1 className="text-4xl font-medium tracking-tight sm:text-6xl">{item.title}</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">{study.summary}</p>
+          <h1 className="text-4xl font-medium tracking-tight sm:text-6xl">{study.title ?? item.title}</h1>
+          {study.subtitle ? (
+            <p className="mt-4 max-w-3xl font-mono text-xs uppercase leading-relaxed tracking-wider text-muted sm:text-sm">
+              {study.subtitle}
+            </p>
+          ) : (
+            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">{study.summary}</p>
+          )}
         </header>
 
         {/* Hero media, framed and labelled like its card */}
         <div className="group relative mt-12 sm:mt-16" data-active="true">
-          <div className="relative aspect-[16/10] overflow-hidden bg-surface sm:aspect-[16/8]">
-            <WorkMedia item={item} sizes="100vw" />
+          <div
+            className={`relative overflow-hidden bg-surface ${
+              hero && hero.type !== "image" ? "aspect-video" : "aspect-[16/10] sm:aspect-[16/8]"
+            }`}
+          >
+            <WorkMedia item={{ ...item, media: hero }} sizes="100vw" />
           </div>
           <DetectFrame visible label={labels} />
         </div>
 
+        {study.body ? (
+          <Body blocks={study.body} item={item} />
+        ) : (
+        <>
         {/* Details beside the story on wide screens */}
         <div className="mt-14 grid gap-12 lg:grid-cols-[18rem_1fr] lg:gap-20">
           <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -173,6 +188,8 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
             </div>
           </section>
         )}
+        </>
+        )}
 
         {/* Next project */}
         <Link
@@ -218,5 +235,63 @@ function Flow({ steps }: { steps: string[] }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+// A carried-over write-up, rendered block by block in its original order.
+function Body({ blocks, item }: { blocks: BodyBlock[]; item: (typeof work)[number] }) {
+  return (
+    <div className="mt-14 max-w-3xl sm:mt-20">
+      {blocks.map((b, i) => {
+        switch (b.kind) {
+          case "heading":
+            return (
+              <h2 key={i} className="mb-4 mt-14 text-2xl font-medium tracking-tight first:mt-0 sm:text-3xl">
+                {b.text}
+              </h2>
+            );
+          case "subheading":
+            return (
+              <h3 key={i} className="mb-2 mt-6 font-mono text-[11px] uppercase tracking-wider text-muted">
+                {b.text}
+              </h3>
+            );
+          case "text":
+            return (
+              <p key={i} className="mb-4 whitespace-pre-line text-lg leading-relaxed">
+                {b.text}
+              </p>
+            );
+          case "quote":
+            return (
+              <blockquote key={i} className="my-6 border-l-2 border-foreground pl-5 text-xl font-medium leading-snug sm:text-2xl">
+                {b.text}
+              </blockquote>
+            );
+          case "list":
+            return (
+              <ul key={i} className="mb-4 list-disc space-y-1.5 pl-6 text-lg leading-relaxed marker:text-muted">
+                {b.items.map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+            );
+          case "media":
+            return <BodyMedia key={i} media={b.media} item={item} />;
+        }
+      })}
+    </div>
+  );
+}
+
+function BodyMedia({ media, item }: { media: Media; item: (typeof work)[number] }) {
+  const aspect = media.type === "youtube" ? 16 / 9 : (media.aspect ?? 16 / 9);
+  return (
+    <figure className="my-8">
+      <div className="relative overflow-hidden bg-surface" style={{ aspectRatio: aspect }}>
+        <WorkMedia item={{ ...item, media }} sizes="(min-width: 768px) 768px, 100vw" fit="contain" />
+      </div>
+      {media.alt && media.type !== "youtube" && <figcaption className="sr-only">{media.alt}</figcaption>}
+    </figure>
   );
 }

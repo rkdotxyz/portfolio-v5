@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { CATEGORY_LABEL, type Category, type WorkItem } from "@/content/work";
 import { DetectFrame } from "./detect-frame";
+import { YouTubeEmbed } from "./youtube-embed";
 
 const ASPECT: Record<Category, string> = {
   "key-project": "aspect-[16/10]",
@@ -83,6 +84,7 @@ export function WorkMedia({
   const { media } = item;
   if (!media) return <GenerativePlaceholder seed={item.id} />;
 
+  if (media.type === "youtube") return <YouTubeEmbed id={media.src} title={media.alt ?? item.title} />;
   if (media.type === "video") {
     return (
       <video
@@ -92,7 +94,7 @@ export function WorkMedia({
         loop
         playsInline
         draggable={false}
-        className={`absolute inset-0 h-full w-full grayscale ${fitClass}`}
+        className={`absolute inset-0 h-full w-full ${fitClass}`}
       />
     );
   }
@@ -105,7 +107,7 @@ export function WorkMedia({
       draggable={false}
       // GIFs would lose their animation and SVGs can't be optimised.
       unoptimized={/\.(gif|svg)$/i.test(media.src)}
-      className={`grayscale ${fitClass}`}
+      className={fitClass}
     />
   );
 }

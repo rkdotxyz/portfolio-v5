@@ -13,7 +13,9 @@
 
 export type Category = "key-project" | "side-project" | "exploration";
 
-export type Media = { type: "image" | "video"; src: string; alt?: string };
+// `youtube` media uses the video id as `src`. `aspect` (width / height) keeps
+// an image at its original proportions where it is shown uncropped.
+export type Media = { type: "image" | "video" | "youtube"; src: string; alt?: string; aspect?: number };
 
 export type WorkItem = {
   id: string;

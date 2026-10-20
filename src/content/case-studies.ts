@@ -9,8 +9,22 @@
 
 import { FRAMER, GITHUB, img, type Media } from "./work";
 
+// A case study written as a sequence of blocks, reproduced in order (used
+// where an existing write-up is carried over as is).
+export type BodyBlock =
+  | { kind: "heading"; text: string }
+  | { kind: "subheading"; text: string }
+  | { kind: "text"; text: string } // line breaks are kept
+  | { kind: "quote"; text: string }
+  | { kind: "list"; items: string[] }
+  | { kind: "media"; media: Media };
+
 export type CaseStudy = {
   summary: string; // one line under the title
+  title?: string; // page title, when it differs from the card's
+  subtitle?: string; // a line under the page title
+  hero?: Media; // page hero, when it differs from the card's media
+  body?: BodyBlock[]; // when set, the page shows this in place of what / why / how
   role?: string;
   team?: string;
   status?: string;
@@ -23,8 +37,6 @@ export type CaseStudy = {
   links?: { label: string; href: string }[];
   gallery?: Media[]; // captioned by each item's alt
 };
-
-const WEBFLOW = "https://cdn.prod.website-files.com/612ef3767dea2ece58c49cd5/";
 
 export const caseStudies: Record<string, CaseStudy> = {
   /* ── Key projects ─────────────────────────────────────────────── */
@@ -41,52 +53,364 @@ export const caseStudies: Record<string, CaseStudy> = {
     gallery: [img(`${GITHUB}esp32-led-snake/main/hardware/wiring.svg`, "Wiring: ESP32, WS2812B matrix, capacitor and data resistor")],
   },
 
+  // Carried over 1:1 from the v4 case study (ramakrushna.xyz/selected-work/planet-under-pressure).
   "planet-under-pressure": {
     summary: "An interactive data-art installation: turn eight knobs and watch a planet change.",
-    status: "Shown at VizChitra 2025",
-    what: "A planet built from environmental data. Each knob on a MIDI controller drives one measure of the planet's health across 201 years, and the planet's colour, texture and balance of land and water shift as you turn it.",
-    why: "Data about the environment usually lives in charts, which take a certain data literacy to read. The question was how to make that data interactive and visual for everyone, from designers and journalists to professors, students and artists.",
-    how: "Eight parameters, one per knob: air quality, water quality, sea level rise, ocean temperature anomaly, land pollution, jet stream fluctuation, loss of living life and vegetation loss. A hundred years of open data per parameter was extended with a predicted hundred years ahead. The planet is built in TouchDesigner with its functions left configurable, and each knob is mapped to several of them; one knob moves blur radius, noise amplitude and hue together. The mappings were tested so no two knobs fight over the same value.",
-    flow: ["Open data · 201 years", "8 parameters", "MIDI knobs", "TouchDesigner", "Planet"],
-    stack: ["TouchDesigner", "MIDI controller", "Open datasets", "Data mapping"],
-    outcome: "Presented at VizChitra 2025 to 50+ people. The takeaway from the room: data is more than graphs and charts, and people understand it better by interacting with it than by reading numbers.",
-    gallery: [
-      img(`${FRAMER}SMPx1FVSLO78nmGPfUkHYoRGTQ.png`, "Control panel: one parameter per knob"),
-      img(`${FRAMER}AyxkfEijZ7vhio7kMTAdedpBU.png`, "Curated data trend"),
-      img(`${FRAMER}ALwoUvsXLC2suknfLrEyanqyyI.png`, "Art setup in TouchDesigner"),
-      img(`${FRAMER}tWa06kk1CHAXIaQIPDrOzt11qM8.png`, "Data mapping in TouchDesigner"),
-      img(`${FRAMER}43Pe3pGYM3wFWtnaIODntJ6T24k.png`, "The planet"),
-      img(`${FRAMER}9hZjmA9PSrqvr1pNXGRN2JHzkWM.png`, "The MIDI controller driving the planet"),
-      img(`${FRAMER}luX8tSEV5K466VrYqHIBNFOMDo.png`, "At VizChitra 2025"),
+    title: "Planet Under Pressure - Designing Tools for Storytelling",
+    subtitle: "Leveraging data to create interactive art installation for an immersive storytelling",
+    body: [
+      { kind: "heading", text: "Background" },
+      {
+        kind: "text",
+        text: "As of today, understanding data requires some level of 'data-literacy'. And when we are connecting data with topics like environmental or societal causes, it becomes difficult for the mass audience to visualise it. This project was an attempt at making data accessible and interactive so that people can connect better with the environmental issues.",
+      },
+      { kind: "heading", text: "Problem Statement" },
+      {
+        kind: "text",
+        text: "Whenever we talk of data we basically refer to graphs and charts. Now this works fine for a smaller audience but for a wider audience it is not accessible. Now, this combined with environmental factor like air pollution level or water pollution level is difficult to visualise through simple abstract charts. So the core problem statement here was:",
+      },
+      { kind: "quote", text: "How can we make data interactive and visual for everyone." },
+      { kind: "media", media: { ...img(`${FRAMER}53L8zfJFtFYbUF0ozKwjI7pLkh4.png`), aspect: 567 / 186 } },
+      { kind: "heading", text: "Target Users" },
+      { kind: "text", text: "The interactive art installation had a broad range of audience including:" },
+      { kind: "list", items: ["Designers", "Journalists", "Professors", "Students", "Artists"] },
+      { kind: "media", media: { ...img(`${FRAMER}luX8tSEV5K466VrYqHIBNFOMDo.png`), aspect: 567 / 226 } },
+      { kind: "heading", text: "The Creation Process" },
+      { kind: "text", text: "The creation of the art installation involved various steps from start to end. The steps comprised of:" },
+      {
+        kind: "list",
+        items: ["Identification of Effecting Parameters", "Data Curation", "Art Creation", "Data Mapping", "Final Showcase"],
+      },
+      { kind: "heading", text: "Identification of Effecting Parameters" },
+      {
+        kind: "text",
+        text: "Various parameters were identified that effect the overall well being of the planet. Given that I was using a MIDI controller to make the installation interactive, I had a constraint of only using 8 parameters (since MIDI controller had 8 knobs). The 8 identified parameters were:",
+      },
+      {
+        kind: "list",
+        items: [
+          "Air Quality Index",
+          "Water Quality Index",
+          "Sea Level Rise",
+          "Ocean Temperature Anomaly",
+          "Land Pollution Index",
+          "Jet Stream Fluctuation",
+          "Loss of Living Life",
+          "Vegetation Loss",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}SMPx1FVSLO78nmGPfUkHYoRGTQ.png`), aspect: 567 / 310 } },
+      { kind: "heading", text: "Data Curation" },
+      {
+        kind: "text",
+        text: "Based on the identified parameters, data for all the 8 parameters were extracted from multiple open-source available data sources. Since the installation planned on showing how parameters effected the planet in a long term so based on the extracted data of last 100 years, a predictive data set was built for the next 100 years. So we had an overall data trend for 201 years.",
+      },
+      { kind: "media", media: { ...img(`${FRAMER}AyxkfEijZ7vhio7kMTAdedpBU.png`), aspect: 567 / 257 } },
+      { kind: "heading", text: "Art Creation" },
+      { kind: "text", text: "With some research and mood-boarding, I identified how the planet might look under various circumstances. For example:" },
+      {
+        kind: "list",
+        items: [
+          "Loss of vegetation would lead to making the planet look less green",
+          "Rise in sea level would lead to lesser soil area and more water area",
+        ],
+      },
+      {
+        kind: "text",
+        text: "Taking all of these references into account, I created the basic art setup in Touchdesigner. Here, values of multiple functions in Touchdesigner were kept configurable to make the art interactive.",
+      },
+      { kind: "media", media: { ...img(`${FRAMER}ALwoUvsXLC2suknfLrEyanqyyI.png`), aspect: 567 / 250 } },
+      { kind: "media", media: { ...img(`${FRAMER}43Pe3pGYM3wFWtnaIODntJ6T24k.png`), aspect: 567 / 250 } },
+      { kind: "heading", text: "Data Mapping" },
+      {
+        kind: "text",
+        text: "The final step included mapping the values of functions with the parameters. In the MIDI controller, every parameter was assigned a specific knob. So now each of those knobs were mapped to different values. For example:",
+      },
+      {
+        kind: "list",
+        items: [
+          "Rotating knob 1 would effect the blur radius, noise amplitude, and hue value",
+          "Rotating knob 2 would effect only noise wave",
+        ],
+      },
+      {
+        kind: "text",
+        text: "Once all the parameters were mapped, I also tested out so that there are no conflicting values tied to multiple knobs. This was essential as it could break the setup.",
+      },
+      { kind: "media", media: { ...img(`${FRAMER}tWa06kk1CHAXIaQIPDrOzt11qM8.png`), aspect: 567 / 250 } },
+      { kind: "heading", text: "Final Outcome" },
+      { kind: "text", text: "The final installation was setup and presented at VizChitra 2025 in an audience of over 50+ people." },
+      { kind: "heading", text: "Impact" },
+      {
+        kind: "text",
+        text: "With over 50+ people attending the session and interacting with the interactive art installation, it sparked 2 insights amongst the viewers:",
+      },
+      {
+        kind: "list",
+        items: [
+          "Data is not merely graph and charts, there are more ways to visualise it",
+          "A better way of making audience understand something is through interaction and visualisation, rather than just showing numbers on a paper",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}6NNj2VP7BETr1Q5KIFtub7Go.png`), aspect: 567 / 206 } },
+      { kind: "media", media: { ...img(`${FRAMER}pklQGu6ZkJGpeoi9GYkDaKlsktQ.png`), aspect: 567 / 206 } },
+      { kind: "media", media: { ...img(`${FRAMER}9hZjmA9PSrqvr1pNXGRN2JHzkWM.png`), aspect: 567 / 206 } },
     ],
   },
 
+  // Carried over 1:1 from the v4 case study (ramakrushna.xyz/selected-work/blade-design-system).
   "blade-design-system": {
     summary: "The design system that powers Razorpay's products.",
-    role: "Product designer to senior product designer, design systems",
-    team: "Blade design systems team, Razorpay",
-    status: "2022–2026",
-    what: "Blade is Razorpay's design system, used across 75+ products in the dashboard, checkout, mobile app and POS, by 60+ designers and 100+ frontend engineers across 6–8 business verticals.",
-    why: "As teams scaled, products drifted apart visually and in how they behaved, designers and developers went back and forth before every launch, and teams kept building one-off versions of what should have been reusable patterns.",
-    how: "Designed 30+ components end to end, from research and API decisions to delivery, and defined the motion of 32 of them. Added design patterns, built the foundations of a data visualisation system, and built Figma plugins including Pattern Creator. On the AI side: built blade-runner, an agent that answers consumers' questions, and rewrote the system's knowledge base for AI agents, improving MCP accuracy by about 25%.",
-    flow: ["Tokens & foundations", "Components", "Patterns", "Figma plugins", "AI agent + MCP", "75+ products"],
-    stack: ["Figma", "Figma plugin API", "Design tokens", "React", "Motion design", "AI agents", "MCP", "Amplitude"],
-    outcome: "Component coverage up 40%, with an estimated $60k and 2,000+ hours saved. Pattern Creator saves about 70% of the time for its ~5 daily users; blade-runner answers with 94% accuracy for ~10 daily users. Two brand refreshes landed without breaking changes, and the open-sourced Figma library passed 14k downloads.",
-    links: [
-      { label: "Blade", href: "https://blade.razorpay.com" },
-      { label: "Code", href: "https://github.com/razorpay/blade" },
-      { label: "Launch video", href: "https://www.youtube.com/watch?v=GH3HA6xOFEw" },
-    ],
-    gallery: [
-      img(`${WEBFLOW}66362a2d5a8c79cdbad52313_blade-problem.png`, "The problem: consistency, collaboration, ease of use"),
-      img(`${WEBFLOW}663758d9e60961d576b6976e_component-design.png`, "Component design"),
-      img(`${WEBFLOW}663758d988c8673f48ac97f3_motion-design.png`, "Motion design for components"),
-      img(`${WEBFLOW}66375f3bd24d4bea08caa336_ds-pattern.png`, "Design patterns"),
-      img(`${WEBFLOW}66375f3a056d35d92ba8a57c_icon-library-1.png`, "Icon library"),
-      img(`${WEBFLOW}66375b03ecb1594f748592a2_figma-library-1.png`, "Figma library"),
-      img(`${WEBFLOW}66375f3a8280bfbeff6ab702_brand-refresh.png`, "Brand refresh"),
-      img(`${WEBFLOW}66375f3b612ac9d08e0ee9bb_ds-education.png`, "Design system education"),
-      img(`${WEBFLOW}66371c57056d35d92b7048db_open-source.png`, "Open-sourcing Blade on Figma Community"),
+    title: "Blade Design System - The DS that powers Razorpay",
+    subtitle: "Building, maintaining and enhancing the design system that powers the products of Razorpay",
+    hero: { type: "youtube", src: "GH3HA6xOFEw", alt: "Blade - Razorpay's Open-Source Design System" },
+    body: [
+      { kind: "heading", text: "Background" },
+      {
+        kind: "text",
+        text: 'Razorpay is a "one stop money movement solution for businesses". It provides a range of products ranging from payments suite to banking suite, from loyalty program management platforms to physical POS device products. It helps processes online payments for online as well as offline businesses.',
+      },
+      { kind: "heading", text: "Problem Statement" },
+      {
+        kind: "text",
+        text: "How do we drive consistency for our products while facilitating collaboration and making it easy to use for consumers.\n\nRazorpay has 6-8 different business verticals, and has over 100+ frontend engineers and 60+ designers. As the teams and products kept scaling up, three major challenges started to arise:\n\n1. Consistency:\nProducts started looking inconsistent, both from visual and interaction standpoint\n\n2. Collaboration:\nThere used to be lot of back and forth between designers and developers before shipping a product\n\n3. Ease of Use:\nDesigners and engineers were creating custom builds for their products which could have been a reusable pattern.",
+      },
+      { kind: "media", media: { ...img(`${FRAMER}Vxbt767WI8jN1FhOtoIzd4HAfN8.png`), aspect: 567 / 257 } },
+      { kind: "heading", text: "Target Users" },
+      {
+        kind: "text",
+        text: "Our first set of primary users were designers and developers inside the org and then the next set of users were the end users who were using Razorpay's products.\n\nWhat this meant was, while designing we had to keep in mind how using the system becomes easier for our primary set of user while keeping in mind that the visuals and interactions of the components should be easily usable by the secondary set of users.",
+      },
+      { kind: "heading", text: "Contributions as a Design Systems Designer" },
+      {
+        kind: "text",
+        text: "Over the past 4 years, working as a designer with the design systems team, I have been able to build and contribute to the growth of design systems in various ways. Here is a list of the notable contributions that I have done:\n\n1. Shipping Components\n2. Defining Motion & Interaction of Components\n3. Defining Design Patterns\n4. Building a Data Viz. System\n5. Building Figma Plugins\n6. Expanding Icon Library\n7. DS Governance\n8. Providing DS Education\n9. Maintaining Figma Library\n10. Making Blade Open Source\n11. DS Evangelisation\n12. Contributing to Brand Refresh\n\nMore details about each of these and the impact created are below.",
+      },
+
+      { kind: "heading", text: "Shipping Components" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Designed 30+ components from scratch that are being used across 50+ products across Razorpay.",
+          "Owned the end-to-end design of the component, including user research, API integration decisions, execution, stakeholder reviews, and final delivery.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      {
+        kind: "list",
+        items: [
+          "Increased the overall component coverage of the design system by 40%.",
+          "Saved around INR 50,00,000 ($60,000) and 2000+ hours (~ 1 quarter) by creating reusable design components.",
+          "Drove systemic consistency and scalability in terms of visual aesthetics & interaction pattern.",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}oKaAUodcn5F39ZluMsRmWBeYGc.png`), aspect: 567 / 257 } },
+      { kind: "media", media: { ...img(`${FRAMER}poRReqcykEakRgpjcJG9p8r0w8.png`), aspect: 567 / 257 } },
+
+      { kind: "heading", text: "Defining Motion & Interaction of Components" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Designed the interaction behaviour and motion of 32 components that are being used across 30+ products.",
+          "Owned the end-to-end motion design flow of the components, including research, execution, reviews, and final delivery.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      {
+        kind: "list",
+        items: [
+          "Integrated consistent motion in 75% of the components in the design system.",
+          "Saved around INR 20,00,000 ($24,000) and 700+ hours (~ 1 month) by integrating consistent motion in the design components.",
+          "Drove systemic consistency and scalability in terms of component behaviour & interaction pattern.",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}RHAJhyhdozyQUrtx7EhDbILG85g.png`), aspect: 567 / 257 } },
+
+      { kind: "heading", text: "Defining Design Patterns" },
+      { kind: "subheading", text: "What I did?" },
+      { kind: "list", items: ["Identified and added 4+ design patterns to the system that are using across various product flows."] },
+      { kind: "subheading", text: "Impact Created" },
+      { kind: "list", items: ["Drove systemic consistency and scalability by defining common reusable patterns."] },
+      { kind: "media", media: { ...img(`${FRAMER}aU7H09Bs4AofrmI8utqQPqQsIKI.png`), aspect: 567 / 257 } },
+
+      { kind: "heading", text: "Building Figma Plugins" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Built Pattern Creator Plugin for easier discovery and usage of UI patterns.",
+          "Made enhancement to Table Creator Plugin to generate tables with realistic data.",
+          "Added Amplitude instrumentation to track usage of plugins.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      { kind: "list", items: ["Easier discovery and adoption of UI patterns with being used by ~5 designers per week."] },
+      // v4 embeds a YouTube video here (ll8kImJo07Y) that is private or removed,
+      // so it can't play; add it back once it is public again.
+
+      { kind: "heading", text: "Building a Data Viz. System" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Identified ~10 chart component use cases and built 4 of the most used data viz. components",
+          "Defined the color logic and foundations for a scalable data visualisation system.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      {
+        kind: "list",
+        items: [
+          "Built a unified data representation system being used in multiple products.",
+          "Improved designer efficiency by 80% and developer efficiency by 90%",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}tbRUeYnPzuphE6iEr5TPw7iBFFw.png`), aspect: 567 / 257 } },
+      { kind: "media", media: { ...img(`${FRAMER}O8QiRXMZZPIDoK7DZYS9ch3A.png`), aspect: 567 / 257 } },
+
+      { kind: "heading", text: "Expanding Icon Library" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Defined design guidelines for designers to refer & contribute icons to Blade.",
+          "Identified and added 28 system icons that are used/ requested frequently.",
+          "Collaborated with communication designers to add 40+ product icons to the icon library.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      {
+        kind: "list",
+        items: [
+          "Setup processes so that designers can contribute icons to the system.",
+          "Scaled up the icon library to handle new products and use cases while maintaining consistency.",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}CCcvPjeJoDEt4Vk6jMAHEplA.png`), aspect: 567 / 257 } },
+      { kind: "media", media: { ...img(`${FRAMER}bfwT3QfgExwh3cenTWYJp9gHd0.png`), aspect: 567 / 257 } },
+
+      { kind: "heading", text: "DS Governance" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Owned up the deviation requests coming from consumers for various components.",
+          "Reviewing and provided inputs on DS implementation in key projects across the organisation",
+          "Resolving consumer queries and unblocked them.",
+          "Conducted FGDs and brainstorming sessions with designers across teams to understand their pain points better.",
+          "Participated and made meaningful additions to the team roadmap.",
+          "Enabling others to contribute to the system by pairing up, providing inputs and reviewing the designs.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      {
+        kind: "list",
+        items: [
+          "Drove systemic consistency across brand by validating & reviewing designs.",
+          "Contributing to the team roadmap to make meaningful impact.",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}kFoTGkyxKUynAJME7KaNcOdga4M.png`), aspect: 567 / 257 } },
+
+      { kind: "heading", text: "Providing DS Education" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Teamed up with the Learning and Development team to create educational content on DS Onboarding for new joiners to the team.",
+          "Conducted multiple workshops, KT sessions and office hours to educate designers on design system.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      { kind: "list", items: ["Scaled up DS to the org by educating consumers on using DS and Figma functionalities."] },
+      { kind: "media", media: { ...img(`${FRAMER}9Ka7WrT871f3Crg0AOHJ9kCYHQ.png`), aspect: 567 / 257 } },
+
+      { kind: "heading", text: "Maintaining Figma Library" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Integrated new Figma features and functionalities in the components to keep every component up to date.",
+          "Ran internal plugins on a periodic basis to ensure the foundations in design and dev are in sync.",
+          "Conducted regular hygiene checks across the DS file.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      {
+        kind: "list",
+        items: [
+          "Led to an overall 70% reduction in total number of variants across 40+ components without compromising the functionalities of the components.",
+          "Enhanced designer experience by making the components lighter.",
+          "Enhanced developer experience by running plugins and generating code syntax for each foundation.",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}7bzQSWdblEVnlzKjHpXXdm1wiPk.png`), aspect: 567 / 257 } },
+      { kind: "media", media: { ...img(`${FRAMER}b4sCuuFce7UO8e4hFUeIm31nnoc.png`), aspect: 567 / 257 } },
+
+      { kind: "heading", text: "Making Blade Open Source" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Led the initiative to make Blade DS open source on Figma community.",
+          "Upgraded the components, cleaned up and structured the DSL file to publish it on Figma community",
+          "Created teaser video for public announcement of the launch.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      {
+        kind: "list",
+        items: [
+          "Evangelising the design system outside the organisation.",
+          "Sharing our learnings and building a holistic design systems community in India.",
+          "The Figma community file received around 16k+ downloads.",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}nbgKxTFgZ03Vzsv2n8GDlTQ0xP0.png`), aspect: 567 / 257 } },
+
+      { kind: "heading", text: "DS Evangelisation" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Wrote a detailed article on the component design process that we follow to design components.",
+          "Gave 4 external talks on various aspects of Blade Design System.",
+          "Made Blade design open source, the community file is available in Figma community.",
+          "Created branding elements and announcement videos to celebrate wins.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      {
+        kind: "list",
+        items: [
+          "Led to global recognition of Blade DS and it being placed along with some mature design systems in the DS community.",
+          "Evangelising the design system inside and outside the organisation.",
+          "Sharing our learnings and building a holistic design systems community in India.",
+        ],
+      },
+
+      { kind: "heading", text: "Contributing to Brand Refresh" },
+      { kind: "subheading", text: "What I did?" },
+      {
+        kind: "list",
+        items: [
+          "Collaborated with brand designers and DS designers to test out the new foundation structure and later setting them up in Figma.",
+          "Migrated 25+ components to the new revamped foundations.",
+          "Paired up with designers from different pods enabling them to migrate the components to new foundations, by doing KT sessions and reviewing the components.",
+          "Upgraded the documentation structure of components for easier consumption.",
+        ],
+      },
+      { kind: "subheading", text: "Impact Created" },
+      {
+        kind: "list",
+        items: [
+          "Rigorous testing of foundations led to ensuring that the foundations work fine in different consumer products.",
+          "Led to faster migration of components to new refreshed foundation, enabling products to use them faster.",
+        ],
+      },
+      { kind: "media", media: { ...img(`${FRAMER}U8WuZRaivAZiMBv0wnBrAqjd8.png`), aspect: 567 / 257 } },
     ],
   },
 
