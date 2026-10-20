@@ -35,7 +35,14 @@ export function WorkCard({
   const isKey = item.category === "key-project";
   return (
     <article data-active={active} data-sound-hover className="group relative">
-      <div className={`border border-line bg-surface ${isKey ? "" : "p-2"}`}>
+      {/* Other cards also sit back a little until hovered or tapped. */}
+      <div
+        className={`border border-line bg-surface ${
+          isKey
+            ? ""
+            : "p-2 opacity-60 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+        }`}
+      >
         <div className="relative overflow-hidden bg-black" style={{ aspectRatio: aspectOf(item) }}>
           {isKey ? (
             <>
@@ -54,7 +61,11 @@ export function WorkCard({
               </span>
             </>
           ) : (
-            <WorkMedia item={item} />
+            // Greyscale until hovered (or tapped), so the key projects lead
+            // and the rest only take colour when you look at them.
+            <div className="absolute inset-0 grayscale transition-[filter] duration-300 group-hover:grayscale-0 group-data-[active=true]:grayscale-0">
+              <WorkMedia item={item} />
+            </div>
           )}
           {item.wip && (
             <span className="absolute left-2 top-2 bg-foreground px-1.5 py-1 font-mono text-[10px] uppercase leading-none tracking-wider text-background">
