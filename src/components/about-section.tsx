@@ -1,6 +1,6 @@
 import { about } from "@/content/profile";
 import { SectionLabel } from "./section-label";
-import { Toolkit } from "./toolkit";
+import { ToolkitTreemap } from "./toolkit-treemap";
 
 export function AboutSection() {
   return (
@@ -29,10 +29,10 @@ export function AboutSection() {
         <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
           <h3 className="text-lg font-medium tracking-tight sm:text-xl">Toolkit</h3>
           <p className="font-mono text-[11px] uppercase tracking-wider text-muted sm:text-xs">
-            From TouchDesigner to the browser
+            Area is how much each tool is used
           </p>
         </div>
-        <Toolkit />
+        <ToolkitTreemap />
       </div>
     </section>
   );

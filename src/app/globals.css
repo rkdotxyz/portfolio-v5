@@ -84,14 +84,6 @@ body {
   from { scale: 1.03; }
 }
 
-/* Dashed outline crawling around targets not yet acquired. */
-.marching-ants {
-  animation: marching-ants 0.9s linear infinite;
-}
-@keyframes marching-ants {
-  to { stroke-dashoffset: -8; }
-}
-
 /* Scan line sweeping a key project card down and back while it is hovered. */
 .group:hover .key-scan {
   animation: key-scan 1.6s ease-in-out infinite alternate;
@@ -100,6 +92,15 @@ body {
 @keyframes key-scan {
   from { top: -2.5rem; }
   to { top: calc(100% - 2.5rem); }
+}
+
+/* A callout's leader line drawing itself out from its corner. */
+.callout-draw {
+  animation: callout-draw 250ms ease-out both;
+}
+@keyframes callout-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
 }
 
 /* Toast-style panels rising from the canvas toolbar. */
@@ -113,8 +114,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .scroll-cue-arrow,
   .toast-in,
+  .callout-draw,
   .detect-in,
-  .marching-ants,
   .group:hover .key-scan,
   .gen-rings,
   .gen-stripes,
