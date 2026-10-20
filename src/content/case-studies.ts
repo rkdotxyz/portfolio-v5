@@ -1,7 +1,8 @@
 /* ------------------------------------------------------------------ *
- *  Short case studies, opened from a card on the canvas. Keyed by the
- *  work item's id (see work.ts). Keep each one brief: what it is, why it
- *  exists, how it works. Leave a field out to hide that part.
+ *  Case studies for the key projects, one page each at /work/<id>. Keyed
+ *  by the work item's id (see work.ts). Side projects and explorations
+ *  have no page; their `about` line in work.ts shows on hover instead.
+ *  Leave a field out to hide that part.
  *
  *  Sources: the v4 site (ramakrushna.xyz), v3 (ramakrushna.webflow.io),
  *  the CV, GitHub READMEs and the projects' own sites. Only what those say.
@@ -164,6 +165,10 @@ export const caseStudies: Record<string, CaseStudy> = {
     title: "Blade Design System - The DS that powers Razorpay",
     subtitle: "Building, maintaining and enhancing the design system that powers the products of Razorpay",
     hero: { type: "youtube", src: "GH3HA6xOFEw", alt: "Blade - Razorpay's Open-Source Design System" },
+    links: [
+      { label: "Docs", href: "https://blade.razorpay.com" },
+      { label: "Code", href: "https://github.com/razorpay/blade" },
+    ],
     body: [
       { kind: "heading", text: "Background" },
       {
@@ -434,198 +439,4 @@ export const caseStudies: Record<string, CaseStudy> = {
       img(`${GITHUB}DM2601/main/prototype/hardware/wiring.svg`, "Wiring: ESP32, RGB LED and two buttons"),
     ],
   },
-
-  /* ── Side projects ────────────────────────────────────────────── */
-
-  "mystic-designs": {
-    summary: "A newsletter documenting products that redefine how tangible interfaces work.",
-    status: "Newsletter on Substack",
-    what: "A curation of real-world tangible UI and interactions: products that redefine how tangible interfaces work, shared as a weekly dose of design inspiration.",
-    links: [{ label: "Read", href: "https://www.mysticdesigns.xyz/" }],
-  },
-
-  keyscout: {
-    summary: "A Figma plugin to search, filter and export the keys and IDs of components, styles and variables.",
-    status: "Published on Figma Community",
-    what: "KeyScout finds the keys and IDs of components, styles and variables in a Figma file, and exports them as JSON, CSV, TXT or TypeScript.",
-    stack: ["Figma plugin API", "HTML", "JavaScript"],
-    links: [
-      { label: "Figma Community", href: "https://www.figma.com/community/plugin/1537879434431017434/keyscout" },
-      { label: "Code", href: "https://github.com/rkdotxyz/keyscout-plugin" },
-    ],
-  },
-
-  "pattern-creator": {
-    summary: "A Figma plugin for discovering and using Blade's UI patterns.",
-    what: "Built as part of Blade at Razorpay: a plugin that makes the system's UI patterns easy to find and use, covering dashboards, list views, detail views, creation views, modal templates and settings, for desktop and mobile.",
-    stack: ["Figma plugin API", "Blade components", "Amplitude"],
-    outcome: "Around 5 daily users and about 70% time saved, with usage tracked through Amplitude.",
-    gallery: [
-      img(`${GITHUB}pattern-creator-plugin-images/main/list_view_desktop.png`, "List view pattern, desktop"),
-      img(`${GITHUB}pattern-creator-plugin-images/main/detail_view_desktop.png`, "Detail view pattern, desktop"),
-      img(`${GITHUB}pattern-creator-plugin-images/main/detail_view_mobile.png`, "Detail view pattern, mobile"),
-    ],
-  },
-
-  healthicons: {
-    summary: "Free, open-source health icons, made with a team of volunteer designers.",
-    role: "Volunteer designer",
-    what: "An icon library for health projects: outline and filled icons in SVG and PNG, released into the public domain (CC0), so anyone can use, edit and republish them without credit.",
-    links: [{ label: "Healthicons", href: "https://healthicons.org/" }],
-  },
-
-  stratosplash: {
-    summary: "Gradients inspired by the sky.",
-    what: "A curated collection of gradients captured from real skies, real moments and real places, gathered in one place to browse and use.",
-    stack: ["Framer"],
-    links: [{ label: "Visit", href: "https://stratosplash.framer.website/" }],
-  },
-
-  "scenic-seats": {
-    summary: "Which side of the plane has the best view? Find out for any Indian domestic route.",
-    what: "Enter a route and a departure time, and Scenic Seats tells you which side of the plane to sit on: for the sunrise, the sunset, or a notable view below such as mountains, coastlines or lakes.",
-    how: "It covers 198 Indian domestic routes, each with three independent view types: sunrise, sunset and scenic.",
-    links: [{ label: "Try it", href: "https://scenic-seats.vercel.app" }],
-  },
-
-  /* ── Explorations ─────────────────────────────────────────────── */
-
-  "pen-plotter": {
-    summary: "Pushing a pen plotter beyond pen and paper, one medium at a time.",
-    status: "Ongoing since 2022",
-    what: "A series of plots, each using a different medium in the plotter's pen holder: sketch pen, UV ink, an LED, a micro-tip pen, pencil, brush pen, calligraphy pen and gel pen.",
-    why: "A pen plotter works well with a simple pen and paper. The question was what happens when you push it: what else can go in the pen holder, and what ideas can it bring to life?",
-    how: "Artworks were generated in TouchDesigner, p5.js, a maze generator and QGIS, then plotted. The UV ink plot hides an easter egg that only shows under UV light. The LED was captured with long-exposure photography. The micro-tip plot is a contour map of the Himalayas over Sikkim from open elevation data. The pencil plot draws a grid over coins to fake an embossed effect, and the brush pen shows how the arm's weight changes stroke width when it is extended.",
-    stack: ["Pen plotter", "TouchDesigner", "p5.js", "QGIS"],
-    gallery: [
-      img(`${FRAMER}t7oQyurKHBTpUxq6laEWOGwkCss.png`, "The series"),
-      img(`${FRAMER}8Y9Eh4Wdv5yGccSigjK4NDnnwU.png`, "001 · Sketch pen"),
-      img(`${FRAMER}ee2Cr1bKZQR2GdHNGomQbm2Y1c.png`, "002 · UV ink pen"),
-      img(`${FRAMER}BO45dFu1JfXvb7JqxK210hmCJI.png`, "003 · LED light, long exposure"),
-      img(`${FRAMER}mBfXsexqmaPm5y6sziwrbMZs88.png`, "004 · Micro-tip pen: Himalayan contours"),
-      img(`${FRAMER}cpptd1uKslvqja42s2vGMTylXQ.png`, "005 · Pencil over coins"),
-      img(`${FRAMER}lZYSoLpbj7VxLNOSYBIez4AyYRM.png`, "006 · Brush pen"),
-      img(`${FRAMER}mJImn26HMmWYQNSkR3dZwPO1cU.png`, "007 · Calligraphy pen"),
-      img(`${FRAMER}KmfnyPij19vTllpvNAohppOO0.png`, "008 · Gel pen ASCII art"),
-    ],
-  },
-
-  "gesture-bloom": {
-    summary: "Open your hand, and a paper flower opens with it.",
-    status: "In progress",
-    what: "A paper flower that mirrors your hand. A webcam watches how open your hand is, and a servo inside the flower opens or closes the petals to match.",
-    how: "MediaPipe hand tracking runs in Chrome and turns the hand into a single openness value. The browser sends it over USB with Web Serial to an Arduino Uno, which drives an MG996R servo. The servo winds a thread that pulls the petals closed; unwinding lets them fall open.",
-    flow: ["Webcam", "MediaPipe", "Web Serial", "Arduino Uno", "Servo", "Paper flower"],
-    stack: ["MediaPipe", "JavaScript", "Web Serial", "Arduino", "MG996R servo", "Paper mechanism"],
-    links: [{ label: "Code", href: "https://github.com/rkdotxyz/gesture-bloom" }],
-  },
-
-  "sonic-signature": {
-    summary: "Draw a shape or sign your name, and hear it.",
-    what: "An interactive web app that turns drawings into sound. Draw on the canvas and your signature or shape becomes its own audio composition.",
-    how: "Strokes are turned into sound in real time, with controls for the waveform and frequency.",
-    stack: ["TypeScript"],
-    links: [
-      { label: "Try it", href: "https://sonic-signature.vercel.app" },
-      { label: "Code", href: "https://github.com/rkdotxyz/Sonic-Signature" },
-    ],
-  },
-
-  "force-field": {
-    summary: "A grid of circles that bends around your cursor.",
-    what: "An interactive art tool: a grid of circles responds to the cursor, producing force-field patterns as you move.",
-    how: "Attraction or repulsion, circle density and field strength can all be tuned live.",
-    stack: ["TypeScript"],
-    links: [
-      { label: "Try it", href: "https://force-field-jade.vercel.app" },
-      { label: "Code", href: "https://github.com/rkdotxyz/Force-Field" },
-    ],
-  },
-
-  "pixel-art-generator": {
-    summary: "Turn any image into pixel art.",
-    what: "A web tool that converts images into pixel art with retro-style effects.",
-    how: "Adjustable pixel size and a choice of colour palettes, from the original colours to greyscale.",
-    stack: ["TypeScript"],
-    links: [
-      { label: "Try it", href: "https://pixel-art-generator-lilac.vercel.app" },
-      { label: "Code", href: "https://github.com/rkdotxyz/Pixel-Art-Generator" },
-    ],
-  },
-
-  "language-of-gen-z": {
-    summary: "A fun, data-driven look at Gen Z's most-used slang and emojis.",
-    what: "An interactive word cloud of popular Gen Z slang and emojis. Toggle between the two, and hover any word for its definition.",
-    stack: ["D3.js", "JavaScript"],
-    links: [
-      { label: "Try it", href: "https://the-language-of-gen-z.vercel.app" },
-      { label: "Code", href: "https://github.com/rkdotxyz/the-language-of-gen-z" },
-    ],
-  },
-
-  middventory: {
-    summary: "A pixel-style map of every part in Middla Lab, and which drawer it lives in.",
-    what: "An inventory of the lab's components in a pixel style, showing which drawer each part lives in.",
-    how: "A static site in plain HTML, CSS and JavaScript; the parts list and drawer names live in one data file, so anyone can keep it up to date.",
-    stack: ["HTML", "CSS", "JavaScript"],
-    links: [{ label: "Code", href: "https://github.com/rkdotxyz/middventory" }],
-  },
-
-  "motion-studio": {
-    summary: "Short films rendered entirely from code.",
-    what: "A setup for making motion pieces in code and rendering them to video.",
-    how: "Every film is a pure function of time: seeking to a moment paints that exact frame, with seeded noise instead of randomness, so a Node script can step through the frames and encode them to H.264.",
-    stack: ["JavaScript", "Node.js"],
-  },
-
-  "projection-ttt": {
-    summary: "Tic-tac-toe, projected onto a surface and played with your hands.",
-    status: "In progress",
-    what: "A projected game of tic-tac-toe. The board is mapped onto a physical surface and moves are made by hand rather than with a mouse.",
-    how: "Built up through separate tests for the webcam, hand tracking, mapping the projected grid and calibrating projector and camera together.",
-    flow: ["Webcam", "Hand tracking", "Calibration", "Projected grid"],
-  },
-
-  "projection-mapping": {
-    summary: "Visuals mapped onto physical objects.",
-    status: "Experiment",
-  },
-  shader: {
-    summary: "Colour and motion from a shader.",
-    status: "Experiment",
-  },
-  "midi-controller": {
-    summary: "Visuals played live with a MIDI controller.",
-    status: "Experiment",
-  },
-  "generative-music": {
-    summary: "Music generated from code.",
-    status: "Experiment",
-  },
-  "light-painting": {
-    summary: "Drawing with light.",
-    status: "Experiment",
-  },
-  "audio-reactive": {
-    summary: "Visuals that move with sound.",
-    status: "Experiment",
-  },
-  typography: {
-    summary: "Letterforms in motion.",
-    status: "Experiment",
-  },
-};
-
-// Shown for work that has no case study yet, so the layout can be reviewed.
-export const placeholderCaseStudy: CaseStudy = {
-  summary: "One line on what this is.",
-  role: "Your role",
-  team: "Who you worked with",
-  status: "Year · status",
-  what: "Two or three sentences on what the project is and who it is for.",
-  why: "The problem, question or curiosity that started it.",
-  how: "How it works: the build, the technology and the key decisions.",
-  flow: ["Input", "Processing", "Output"],
-  stack: ["Tool", "Tool", "Tool"],
-  outcome: "What came of it: results, learnings, where it went next.",
 };

@@ -6,17 +6,21 @@ import { DetectFrame } from "@/components/detect-frame";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { WorkMedia } from "@/components/work-card";
-import { caseStudies, placeholderCaseStudy, type BodyBlock } from "@/content/case-studies";
-import { CATEGORY_LABEL, work, type Media } from "@/content/work";
+import { caseStudies, type BodyBlock } from "@/content/case-studies";
+import { work, type Media, type WorkItem } from "@/content/work";
 
-// One page per project, prerendered at build time.
+// Only key projects have a page; side projects and explorations are described
+// in a callout on the canvas.
+const projects = work.filter((w) => w.category === "key-project" && caseStudies[w.id]);
+
+// One page per key project, prerendered at build time.
 export function generateStaticParams() {
-  return work.map((w) => ({ id: w.id }));
+  return projects.map((w) => ({ id: w.id }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/work/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const item = work.find((w) => w.id === id);
+  const item = projects.find((w) => w.id === id);
   if (!item) return {};
   const study = caseStudies[id];
   return {
@@ -41,15 +45,14 @@ export default function CaseStudyPage({ params }: PageProps<"/work/[id]">) {
 
 async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"] }) {
   const { id } = await params;
-  const index = work.findIndex((w) => w.id === id);
+  const index = projects.findIndex((w) => w.id === id);
   if (index < 0) notFound();
 
-  const item = work[index];
-  const prev = work[(index - 1 + work.length) % work.length];
-  const next = work[(index + 1) % work.length];
-  const study = caseStudies[id] ?? placeholderCaseStudy;
-  const isDraft = !caseStudies[id];
-  const labels = item.tags ?? [CATEGORY_LABEL[item.category]];
+  const item = projects[index];
+  const prev = projects[(index - 1 + projects.length) % projects.length];
+  const next = projects[(index + 1) % projects.length];
+  const study = caseStudies[id];
+  const labels = item.tags ?? [];
   const hero = study.hero ?? item.media;
 
   const meta = [
@@ -78,12 +81,6 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
       </nav>
 
       <article className="px-4 pb-24 pt-14 sm:px-6 sm:pt-20">
-        {isDraft && (
-          <p className="mb-8 border border-dashed border-faint px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-muted">
-            Template: no case study written for this project yet
-          </p>
-        )}
-
         {/* Title */}
         <header className="max-w-4xl">
           <h1 className="text-4xl font-medium tracking-tight sm:text-6xl">{study.title ?? item.title}</h1>
@@ -108,11 +105,7 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
           <DetectFrame visible label={labels} />
         </div>
 
-        {study.body ? (
-          <Body blocks={study.body} item={item} />
-        ) : (
-        <>
-        {/* Details beside the story on wide screens */}
+        {/* Details beside the story on wide screens; the same for every project */}
         <div className="mt-14 grid gap-12 lg:grid-cols-[18rem_1fr] lg:gap-20">
           <aside className="lg:sticky lg:top-24 lg:self-start">
             {meta.length > 0 && (
@@ -124,6 +117,19 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
                   </div>
                 ))}
               </dl>
+            )}
+
+            {labels.length > 0 && (
+              <div className="mt-8">
+                <h2 className="font-mono text-[10px] uppercase tracking-wider text-muted">Kind of work</h2>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {labels.map((t) => (
+                    <li key={t} className="border border-line px-2.5 py-1.5 text-sm">
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
 
             {study.stack && study.stack.length > 0 && (
@@ -156,18 +162,21 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
             )}
           </aside>
 
-          <div className="max-w-2xl">
-            {study.what && <Block title="What it is">{study.what}</Block>}
-            {study.why && <Block title="Why">{study.why}</Block>}
-            {(study.how || study.flow) && (
-              <Block title="How it works">
-                {study.how}
-                {study.flow && <Flow steps={study.flow} />}
-              </Block>
-            )}
-            {study.outcome && <Block title="Outcome">{study.outcome}</Block>}
-            {!study.what && !study.why && !study.how && !study.outcome && (
-              <p className="text-muted">More on this one soon.</p>
+          <div className="min-w-0 max-w-3xl">
+            {study.body ? (
+              <Body blocks={study.body} item={item} />
+            ) : (
+              <>
+                {study.what && <Block title="What it is">{study.what}</Block>}
+                {study.why && <Block title="Why">{study.why}</Block>}
+                {(study.how || study.flow) && (
+                  <Block title="How it works">
+                    {study.how}
+                    {study.flow && <Flow steps={study.flow} />}
+                  </Block>
+                )}
+                {study.outcome && <Block title="Outcome">{study.outcome}</Block>}
+              </>
             )}
           </div>
         </div>
@@ -187,8 +196,6 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
               ))}
             </div>
           </section>
-        )}
-        </>
         )}
 
         {/* Next project */}
@@ -239,20 +246,21 @@ function Flow({ steps }: { steps: string[] }) {
 }
 
 // A carried-over write-up, rendered block by block in its original order.
-function Body({ blocks, item }: { blocks: BodyBlock[]; item: (typeof work)[number] }) {
+// Headings use the same small labels as the other case studies' sections.
+function Body({ blocks, item }: { blocks: BodyBlock[]; item: WorkItem }) {
   return (
-    <div className="mt-14 max-w-3xl sm:mt-20">
+    <div>
       {blocks.map((b, i) => {
         switch (b.kind) {
           case "heading":
             return (
-              <h2 key={i} className="mb-4 mt-14 text-2xl font-medium tracking-tight first:mt-0 sm:text-3xl">
+              <h2 key={i} className="mb-3 mt-12 font-mono text-[11px] uppercase tracking-wider text-muted first:mt-0">
                 {b.text}
               </h2>
             );
           case "subheading":
             return (
-              <h3 key={i} className="mb-2 mt-6 font-mono text-[11px] uppercase tracking-wider text-muted">
+              <h3 key={i} className="mb-2 mt-8 text-lg font-medium">
                 {b.text}
               </h3>
             );
@@ -284,7 +292,7 @@ function Body({ blocks, item }: { blocks: BodyBlock[]; item: (typeof work)[numbe
   );
 }
 
-function BodyMedia({ media, item }: { media: Media; item: (typeof work)[number] }) {
+function BodyMedia({ media, item }: { media: Media; item: WorkItem }) {
   const aspect = media.type === "youtube" ? 16 / 9 : (media.aspect ?? 16 / 9);
   return (
     <figure className="my-8">

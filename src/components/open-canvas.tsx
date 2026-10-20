@@ -14,7 +14,7 @@ import { work, type Category } from "@/content/work";
 import { play, type SoundName } from "@/lib/sound";
 import { CanvasFilter, CATEGORIES } from "./canvas-filter";
 import { CanvasMinimap, type Rect } from "./canvas-minimap";
-import { WorkCard, cardHeight } from "./work-card";
+import { WorkCard, cardHeight, type CalloutDirection } from "./work-card";
 
 type View = { x: number; y: number; s: number };
 type Point = { x: number; y: number };
@@ -92,6 +92,8 @@ export function OpenCanvas() {
   const [positions, setPositions] = useState<Record<string, Point>>(initialPositions);
   const [order, setOrder] = useState<string[]>(initialOrder);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // A side project or exploration whose callout is held open by a tap.
+  const [pinnedId, setPinnedId] = useState<string | null>(null);
   const [shown, setShown] = useState<Set<Category>>(ALL);
   const [layout, setLayout] = useState<Layout>("scatter");
   const [animating, setAnimating] = useState(false);
@@ -110,16 +112,21 @@ export function OpenCanvas() {
   const tap = useRef<{ start: Point; moved: boolean } | null>(null);
   const router = useRouter();
 
-  // Each project has its own page.
+  // Key projects open their case study; other cards toggle their callout.
   const openProject = (id: string) => {
-    play("open");
-    router.push(`/work/${id}`);
+    if (workById.get(id)?.category === "key-project") {
+      play("open");
+      router.push(`/work/${id}`);
+    } else {
+      play("click");
+      setPinnedId((p) => (p === id ? null : id));
+    }
   };
 
   // Old shared links used ?project=<id>; send them to the project's page.
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("project");
-    if (id && workById.has(id)) router.replace(`/work/${id}`);
+    if (id && workById.get(id)?.category === "key-project") router.replace(`/work/${id}`);
   }, [router]);
 
   const animTimer = useRef<number | undefined>(undefined);
@@ -243,6 +250,7 @@ export function OpenCanvas() {
     if (tap.current && !tap.current.moved && pointers.current.size === 0) {
       const card = document.elementFromPoint(e.clientX, e.clientY)?.closest<HTMLElement>("[data-work-id]");
       if (card?.dataset.workId) openProject(card.dataset.workId);
+      else setPinnedId(null);
     }
     tap.current = null;
   };
@@ -363,6 +371,14 @@ export function OpenCanvas() {
         >
           {placed.map(({ id, w, visible, pos, width }) => {
             const draggable = layout === "scatter" && visible;
+            const isKey = w?.category === "key-project";
+            const pinned = pinnedId === id;
+            // Point the callout toward the middle of the view, and below the
+            // card when it sits near the top.
+            const callout: CalloutDirection = {
+              x: view.x + (pos.x + width / 2) * view.s > size.w / 2 ? "left" : "right",
+              y: view.y + pos.y * view.s < 180 ? "down" : "up",
+            };
             const hidden = layout === "grid" ? "pointer-events-none opacity-0" : "pointer-events-none opacity-10";
             return (
               <div
@@ -372,13 +388,13 @@ export function OpenCanvas() {
                 onPointerMove={draggable ? onCardMove : undefined}
                 onPointerUp={draggable ? onCardUp : undefined}
                 onPointerCancel={draggable ? onCardUp : undefined}
-                className={`absolute ${animating ? ease : "transition-opacity duration-300"} ${
-                  draggable ? "cursor-move touch-none" : w ? "cursor-pointer" : ""
-                } ${visible ? "" : hidden}`}
+                className={`absolute hover:z-30 ${pinned ? "z-30" : ""} ${
+                  animating ? ease : "transition-opacity duration-300"
+                } ${draggable ? "cursor-move touch-none" : isKey ? "cursor-pointer" : ""} ${visible ? "" : hidden}`}
                 style={{ left: pos.x, top: pos.y, width }}
               >
                 {w ? (
-                  <WorkCard item={w} active={activeId === id} />
+                  <WorkCard item={w} active={activeId === id || pinned} callout={callout} scale={view.s} />
                 ) : (
                   <NoteCard />
                 )}

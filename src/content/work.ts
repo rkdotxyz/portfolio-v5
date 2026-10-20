@@ -7,8 +7,8 @@
  *  Local files go in /public/work. Remote URLs need their host listed in
  *  next.config.ts. Without `media`, the card shows a generative placeholder.
  *
- *  `id` is the URL slug (?project=<id>) and the key for the case study in
- *  case-studies.ts.
+ *  `id` is the key project's URL slug (/work/<id>) and the key for its case
+ *  study in case-studies.ts.
  * ------------------------------------------------------------------ */
 
 export type Category = "key-project" | "side-project" | "exploration";
@@ -25,6 +25,10 @@ export type WorkItem = {
   media?: Media;
   // Key projects: the kinds of work, shown as label segments on their always-on frame.
   tags?: string[];
+  // Side projects and explorations: a line or two shown in a callout on hover,
+  // and what it was made with. (Key projects have a case study page instead.)
+  about?: string;
+  tools?: string[];
   // World position on the canvas (top-left corner) and card width, in px.
   x: number;
   y: number;
@@ -100,42 +104,199 @@ export const work: WorkItem[] = [
 
   // Ring around the cluster, media-rich work closest in.
   // Top row
-  { id: "projection-mapping", category: "exploration", title: "Projection Mapping", media: img(`${FRAMER}1kvOIZy1UJFdiTUTeIkoV4kEpwU.gif`, "Visuals projection-mapped onto boxes"), x: -700, y: -640, w: EXP },
-  { id: "mystic-designs", category: "side-project", title: "Mystic Designs", media: img(`${FRAMER}LyrqfdBo7rmyxs6wDZBbTtANyw.png`, "Mystic Designs logo"), x: -470, y: -640, w: SIDE },
-  { id: "shader", category: "exploration", title: "Shader", media: img(`${FRAMER}DO3mYijHrDZGuzgr1gna9uLGaHo.gif`, "Flowing shader colour bands"), x: -200, y: -640, w: EXP },
-  { id: "keyscout", category: "side-project", title: "KeyScout", year: "2025", media: img(`${FRAMER}zMGRoGa2w8chEqsaBIe1901Xrj0.png`, "KeyScout plugin icon"), x: 30, y: -640, w: SIDE },
-  { id: "midi-controller", category: "exploration", title: "MIDI Controller", media: img(`${FRAMER}sFlrG9ptSIgjdMPW5PTVfsbuaPM.gif`, "Visuals driven by a MIDI controller"), x: 300, y: -640, w: EXP },
-  { id: "light-painting", category: "exploration", title: "Light Painting", media: img(`${FRAMER}oWQOJPIs0pZLGlql5qlXAjOlvW8.gif`, "A light trail drawn in the dark"), x: 540, y: -640, w: EXP },
+  {
+    id: "projection-mapping",
+    category: "exploration",
+    title: "Projection Mapping",
+    about: "Visuals projection-mapped onto physical objects.",
+    media: img(`${FRAMER}1kvOIZy1UJFdiTUTeIkoV4kEpwU.gif`, "Visuals projection-mapped onto boxes"),
+    x: -700, y: -640, w: EXP,
+  },
+  {
+    id: "mystic-designs",
+    category: "side-project",
+    title: "Mystic Designs",
+    about: "A newsletter curating real-world tangible UI: products that redefine how tangible interfaces work.",
+    tools: ["Substack"],
+    media: img("/work/mystic-designs.jpg", "The Mystic Designs newsletter archive"),
+    x: -470, y: -640, w: SIDE,
+  },
+  {
+    id: "shader",
+    category: "exploration",
+    title: "Shader",
+    about: "Colour and motion from a shader.",
+    media: img(`${FRAMER}DO3mYijHrDZGuzgr1gna9uLGaHo.gif`, "Flowing shader colour bands"),
+    x: -200, y: -640, w: EXP,
+  },
+  {
+    id: "keyscout",
+    category: "side-project",
+    title: "KeyScout",
+    year: "2025",
+    about: "A Figma plugin that finds the keys and IDs of components, styles and variables, and exports them as JSON, CSV, TXT or TypeScript.",
+    tools: ["Figma plugin API", "JavaScript"],
+    media: img("/work/keyscout.jpg", "KeyScout on Figma Community"),
+    x: 30, y: -640, w: SIDE,
+  },
+  {
+    id: "midi-controller",
+    category: "exploration",
+    title: "MIDI Controller",
+    about: "Visuals played live with a MIDI controller.",
+    media: img(`${FRAMER}sFlrG9ptSIgjdMPW5PTVfsbuaPM.gif`, "Visuals driven by a MIDI controller"),
+    x: 300, y: -640, w: EXP,
+  },
+  {
+    id: "light-painting",
+    category: "exploration",
+    title: "Light Painting",
+    about: "Drawing with light.",
+    media: img(`${FRAMER}oWQOJPIs0pZLGlql5qlXAjOlvW8.gif`, "A light trail drawn in the dark"),
+    x: 540, y: -640, w: EXP,
+  },
 
   // Left column
-  { id: "pen-plotter", category: "exploration", title: "Pen Plotter", year: "2022–", media: img(`${FRAMER}lVyFtm0Ztev0RVnv1832OAAdKvM.png`, "Plotted artworks in different mediums"), x: -660, y: -360, w: EXP },
-  { id: "healthicons", category: "side-project", title: "Healthicons", media: img(`${FRAMER}UQjfdLZfhbKcICNHtOl345uIPM.png`, "Healthicons logo"), x: -700, y: -100, w: SIDE },
-  { id: "audio-reactive", category: "exploration", title: "Audio Reactive", media: img(`${FRAMER}VD3Y9czXbRsExpkUTPAAzDSQ7hY.gif`, "Visuals reacting to sound"), x: -660, y: 150, w: EXP },
+  {
+    id: "pen-plotter",
+    category: "exploration",
+    title: "Pen Plotter",
+    year: "2022–",
+    about: "Pushing a pen plotter beyond pen and paper: UV ink, an LED, pencil, brush and calligraphy pens, one medium per plot.",
+    tools: ["TouchDesigner", "p5.js", "QGIS"],
+    media: img(`${FRAMER}lVyFtm0Ztev0RVnv1832OAAdKvM.png`, "Plotted artworks in different mediums"),
+    x: -660, y: -360, w: EXP,
+  },
+  {
+    id: "healthicons",
+    category: "side-project",
+    title: "Healthicons",
+    about: "Free, open-source health icons in the public domain, made with a team of volunteer designers.",
+    media: img("/work/healthicons.jpg", "The Healthicons library"),
+    x: -700, y: -100, w: SIDE,
+  },
+  {
+    id: "audio-reactive",
+    category: "exploration",
+    title: "Audio Reactive",
+    about: "Visuals that move with sound.",
+    media: img(`${FRAMER}VD3Y9czXbRsExpkUTPAAzDSQ7hY.gif`, "Visuals reacting to sound"),
+    x: -660, y: 150, w: EXP,
+  },
 
   // Right column
-  { id: "stratosplash", category: "side-project", title: "Stratosplash", media: img(`${FRAMER}YxMKFVYObzVHhhBbbe9V0rjMYeY.png`, "Stratosplash logo"), x: 480, y: -360, w: SIDE },
-  { id: "generative-music", category: "exploration", title: "Generative Music", media: img(`${FRAMER}ssF2EBws3Q9SoKkiiiNnqRDO3Zk.gif`, "Live-coded generative music"), x: 500, y: -100, w: EXP },
+  {
+    id: "stratosplash",
+    category: "side-project",
+    title: "Stratosplash",
+    about: "Gradients captured from real skies, real moments and real places, collected in one place.",
+    tools: ["Framer"],
+    media: img("/work/stratosplash.jpg", "The Stratosplash site"),
+    x: 480, y: -360, w: SIDE,
+  },
+  {
+    id: "generative-music",
+    category: "exploration",
+    title: "Generative Music",
+    about: "Music generated from code.",
+    media: img(`${FRAMER}ssF2EBws3Q9SoKkiiiNnqRDO3Zk.gif`, "Live-coded generative music"),
+    x: 500, y: -100, w: EXP,
+  },
   {
     id: "pattern-creator",
     category: "side-project",
     title: "Pattern Creator",
+    about: "A Figma plugin, built for Blade at Razorpay, that makes the system's UI patterns easy to find and use. About 70% time saved.",
+    tools: ["Figma plugin API", "Amplitude"],
     media: img(`${GITHUB}pattern-creator-plugin-images/main/Dashboard%20UI%20-%20Desktop.png`, "A dashboard pattern generated by the plugin"),
-    x: 480,
-    y: 150,
-    w: SIDE,
+    x: 480, y: 150, w: SIDE,
   },
 
   // Bottom row
-  { id: "typography", category: "exploration", title: "Typography", media: img(`${FRAMER}PfMZ22AeOAugh6aFxtL0gmS4Xo.gif`, "Animated letterform"), x: -700, y: 420, w: EXP },
-  { id: "scenic-seats", category: "side-project", title: "Scenic Seats", x: -470, y: 420, w: SIDE },
-  { id: "gesture-bloom", category: "exploration", title: "Gesture Bloom", year: "2026", x: -200, y: 420, w: EXP },
-  { id: "sonic-signature", category: "exploration", title: "Sonic Signature", year: "2025", x: 30, y: 420, w: EXP },
-  { id: "projection-ttt", category: "exploration", title: "Projection TTT", x: 270, y: 420, w: EXP },
-  { id: "force-field", category: "exploration", title: "Force Field", year: "2025", x: 510, y: 420, w: EXP },
+  {
+    id: "typography",
+    category: "exploration",
+    title: "Typography",
+    about: "Letterforms in motion.",
+    media: img(`${FRAMER}PfMZ22AeOAugh6aFxtL0gmS4Xo.gif`, "Animated letterform"),
+    x: -700, y: 420, w: EXP,
+  },
+  {
+    id: "scenic-seats",
+    category: "side-project",
+    title: "Scenic Seats",
+    about: "Which side of the plane to sit on for the sunrise, the sunset or the view, across 198 Indian domestic routes.",
+    x: -470, y: 420, w: SIDE,
+  },
+  {
+    id: "gesture-bloom",
+    category: "exploration",
+    title: "Gesture Bloom",
+    year: "2026",
+    about: "A paper flower that opens with your hand. MediaPipe tracks the hand in the browser; a servo pulls the petals.",
+    tools: ["MediaPipe", "Web Serial", "Arduino"],
+    x: -200, y: 420, w: EXP,
+  },
+  {
+    id: "sonic-signature",
+    category: "exploration",
+    title: "Sonic Signature",
+    year: "2025",
+    about: "Draw a shape or sign your name, and hear it as its own composition.",
+    tools: ["TypeScript"],
+    x: 30, y: 420, w: EXP,
+  },
+  {
+    id: "projection-ttt",
+    category: "exploration",
+    title: "Projection TTT",
+    about: "Tic-tac-toe projected onto a surface and played with your hands, tracked by a webcam.",
+    x: 270, y: 420, w: EXP,
+  },
+  {
+    id: "force-field",
+    category: "exploration",
+    title: "Force Field",
+    year: "2025",
+    about: "A grid of circles that bends around your cursor, with live controls for attraction, density and strength.",
+    tools: ["TypeScript"],
+    x: 510, y: 420, w: EXP,
+  },
 
   // Outer edges
-  { id: "pixel-art-generator", category: "exploration", title: "Pixel Art Generator", year: "2025", x: -960, y: -480, w: EXP },
-  { id: "language-of-gen-z", category: "exploration", title: "Language of Gen Z", year: "2025", x: -960, y: -150, w: EXP },
-  { id: "middventory", category: "exploration", title: "Middventory", year: "2026", x: -960, y: 180, w: EXP },
-  { id: "motion-studio", category: "exploration", title: "Motion Studio", x: 780, y: -150, w: EXP },
+  {
+    id: "pixel-art-generator",
+    category: "exploration",
+    title: "Pixel Art Generator",
+    year: "2025",
+    about: "Turns any image into pixel art, with adjustable pixel size and colour palettes.",
+    tools: ["TypeScript"],
+    x: -960, y: -480, w: EXP,
+  },
+  {
+    id: "language-of-gen-z",
+    category: "exploration",
+    title: "Language of Gen Z",
+    year: "2025",
+    about: "An interactive word cloud of Gen Z slang and emojis. Hover any word for its meaning.",
+    tools: ["D3.js"],
+    x: -960, y: -150, w: EXP,
+  },
+  {
+    id: "middventory",
+    category: "exploration",
+    title: "Middventory",
+    year: "2026",
+    about: "A pixel-style map of every part in Middla Lab, and which drawer it lives in.",
+    tools: ["HTML", "CSS", "JavaScript"],
+    x: -960, y: 180, w: EXP,
+  },
+  {
+    id: "motion-studio",
+    category: "exploration",
+    title: "Motion Studio",
+    about: "Short films rendered entirely from code, frame by frame, then encoded to video.",
+    tools: ["JavaScript", "Node.js"],
+    x: 780, y: -150, w: EXP,
+  },
 ];

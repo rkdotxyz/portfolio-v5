@@ -18,10 +18,25 @@ export const cardHeight = (category: Category, width: number) =>
 
 const SHORT: Record<Category, string> = { "key-project": "key", "side-project": "side", exploration: "exp" };
 
+// Which way a card's callout points, so it opens toward the middle of the view.
+export type CalloutDirection = { x: "left" | "right"; y: "up" | "down" };
+
 // A card of work on the canvas. Key projects carry an always-on detection
-// frame tagged with the kinds of work; other cards get one on hover (or press,
-// on touch) tagged with their category.
-export function WorkCard({ item, active }: { item: WorkItem; active: boolean }) {
+// frame tagged with the kinds of work, and open their case study. Other cards
+// get a frame on hover (or tap, on touch) tagged with their category, and a
+// callout with a short description. `scale` is the canvas zoom, so the
+// callout can stay the same size on screen.
+export function WorkCard({
+  item,
+  active,
+  callout = { x: "right", y: "up" },
+  scale = 1,
+}: {
+  item: WorkItem;
+  active: boolean;
+  callout?: CalloutDirection;
+  scale?: number;
+}) {
   const isKey = item.category === "key-project";
   return (
     <article data-active={active} data-sound-hover className="group relative">
@@ -67,7 +82,66 @@ export function WorkCard({ item, active }: { item: WorkItem; active: boolean }) 
       ) : (
         <DetectFrame label={CATEGORY_LABEL[item.category]} />
       )}
+
+      {!isKey && item.about && <Callout item={item} direction={callout} scale={scale} />}
     </article>
+  );
+}
+
+// Leader line: a 60° rise off the card's corner, then a run out to the box.
+const RISE = { x: 24, y: 42 };
+const RUN = 36;
+
+// A description pinned to the card by a leader line, like an annotation on a
+// detection. Drawn from the frame's top corner (bottom, near the top of the
+// view) and counter-scaled so it reads the same at any zoom.
+function Callout({ item, direction, scale }: { item: WorkItem; direction: CalloutDirection; scale: number }) {
+  const sx = direction.x === "right" ? 1 : -1;
+  const sy = direction.y === "up" ? -1 : 1;
+  const end = { x: sx * (RISE.x + RUN), y: sy * RISE.y };
+  const show = "opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100";
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute z-20"
+      style={{
+        // A zero-size anchor on the frame's corner, the card's outer edge.
+        width: 0,
+        height: 0,
+        left: direction.x === "right" ? "100%" : 0,
+        top: direction.y === "up" ? 0 : "100%",
+        transform: `scale(${1 / scale})`,
+        transformOrigin: "0 0",
+      }}
+    >
+      <svg className="absolute left-0 top-0 overflow-visible" width="1" height="1">
+        <polyline
+          points={`0,0 ${sx * RISE.x},${sy * RISE.y} ${end.x},${end.y}`}
+          pathLength={1}
+          fill="none"
+          stroke="var(--foreground)"
+          strokeWidth={1}
+          className="transition-[stroke-dashoffset] duration-300 ease-out [stroke-dasharray:1] [stroke-dashoffset:1] group-hover:[stroke-dashoffset:0] group-data-[active=true]:[stroke-dashoffset:0]"
+        />
+        <circle cx={0} cy={0} r={2.5} fill="var(--foreground)" className={`transition-opacity duration-150 ${show}`} />
+      </svg>
+      <div
+        className={`absolute w-60 border border-foreground bg-background transition-opacity duration-200 group-hover:delay-150 group-data-[active=true]:delay-150 ${show}`}
+        style={{
+          [direction.x === "right" ? "left" : "right"]: Math.abs(end.x),
+          top: end.y,
+          transform: "translateY(-50%)",
+        }}
+      >
+        <p className="bg-foreground px-2 py-[5px] font-mono text-[13px] leading-none text-background">{item.title}</p>
+        <p className="px-3 pt-2.5 text-[13px] leading-snug">{item.about}</p>
+        {item.tools && item.tools.length > 0 ? (
+          <p className="px-3 pb-2.5 pt-2 font-mono text-[11px] leading-snug text-muted">{item.tools.join(" · ")}</p>
+        ) : (
+          <div className="h-2.5" />
+        )}
+      </div>
+    </div>
   );
 }
 
