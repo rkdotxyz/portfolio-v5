@@ -6,14 +6,13 @@ import {
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { work, type Category } from "@/content/work";
 import { play, type SoundName } from "@/lib/sound";
 import { CanvasFilter, CATEGORIES } from "./canvas-filter";
-import { CaseStudyDialog } from "./case-study-dialog";
 import { CanvasMinimap, type Rect } from "./canvas-minimap";
 import { WorkCard, cardHeight } from "./work-card";
 
@@ -50,27 +49,6 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 
 // A press that moves less than this (screen px) counts as a click, not a drag.
 const TAP_SLOP = 5;
-
-// The open case study lives in the URL (?project=<id>) so it can be linked to
-// and the back button closes it.
-const PROJECT_EVENT = "projectchange";
-const subscribeProject = (onChange: () => void) => {
-  window.addEventListener("popstate", onChange);
-  window.addEventListener(PROJECT_EVENT, onChange);
-  return () => {
-    window.removeEventListener("popstate", onChange);
-    window.removeEventListener(PROJECT_EVENT, onChange);
-  };
-};
-const readProject = () => new URLSearchParams(window.location.search).get("project");
-const setProjectParam = (id: string | null, mode: "push" | "replace") => {
-  const url = new URL(window.location.href);
-  if (id) url.searchParams.set("project", id);
-  else url.searchParams.delete("project");
-  if (mode === "push") window.history.pushState(null, "", url);
-  else window.history.replaceState(null, "", url);
-  window.dispatchEvent(new Event(PROJECT_EVENT));
-};
 
 const gridColumns = (width: number) =>
   width < 640 ? 2 : clamp(Math.floor((width - 96 + GAP) / (COL + GAP)), 2, 5);
@@ -130,26 +108,20 @@ export function OpenCanvas() {
   const drag = useRef<{ id: string; pointerId: number; last: Point; start: Point; moved: boolean } | null>(null);
   // A single-finger press on the background, to tell a click on a card from a pan.
   const tap = useRef<{ start: Point; moved: boolean } | null>(null);
-  const pushedProject = useRef(false);
+  const router = useRouter();
 
-  const projectId = useSyncExternalStore(subscribeProject, readProject, () => null);
-  const openItem = projectId ? (workById.get(projectId) ?? null) : null;
-
+  // Each project has its own page.
   const openProject = (id: string) => {
-    if (!projectId) play("open");
-    // First open adds a history entry; moving between projects replaces it.
-    if (!projectId) pushedProject.current = true;
-    setProjectParam(id, projectId ? "replace" : "push");
+    play("open");
+    router.push(`/work/${id}`);
   };
-  const closeProject = () => {
-    play("close");
-    if (pushedProject.current) {
-      pushedProject.current = false;
-      window.history.back();
-    } else {
-      setProjectParam(null, "replace");
-    }
-  };
+
+  // Old shared links used ?project=<id>; send them to the project's page.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("project");
+    if (id && workById.has(id)) router.replace(`/work/${id}`);
+  }, [router]);
+
   const animTimer = useRef<number | undefined>(undefined);
   const fitted = useRef(false);
 
@@ -461,7 +433,6 @@ export function OpenCanvas() {
           </CanvasButton>
         </div>
       </div>
-      <CaseStudyDialog item={openItem} onClose={closeProject} onOpen={openProject} />
     </section>
   );
 }

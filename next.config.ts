@@ -4,6 +4,15 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    // Project media is still hosted where it was first published: the v4
+    // (Framer) and v3 (Webflow) sites, GitHub, and the projects' own sites.
+    remotePatterns: [
+      new URL("https://framerusercontent.com/**"),
+      new URL("https://cdn.prod.website-files.com/**"),
+      new URL("https://raw.githubusercontent.com/rkdotxyz/**"),
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {

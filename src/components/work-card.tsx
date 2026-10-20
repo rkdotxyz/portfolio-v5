@@ -70,7 +70,16 @@ export function WorkCard({ item, active }: { item: WorkItem; active: boolean }) 
   );
 }
 
-export function WorkMedia({ item, sizes = "320px" }: { item: WorkItem; sizes?: string }) {
+export function WorkMedia({
+  item,
+  sizes = "320px",
+  fit = "cover",
+}: {
+  item: WorkItem;
+  sizes?: string;
+  fit?: "cover" | "contain";
+}) {
+  const fitClass = fit === "cover" ? "object-cover" : "object-contain";
   const { media } = item;
   if (!media) return <GenerativePlaceholder seed={item.id} />;
 
@@ -83,7 +92,7 @@ export function WorkMedia({ item, sizes = "320px" }: { item: WorkItem; sizes?: s
         loop
         playsInline
         draggable={false}
-        className="absolute inset-0 h-full w-full object-cover grayscale"
+        className={`absolute inset-0 h-full w-full grayscale ${fitClass}`}
       />
     );
   }
@@ -94,8 +103,9 @@ export function WorkMedia({ item, sizes = "320px" }: { item: WorkItem; sizes?: s
       fill
       sizes={sizes}
       draggable={false}
-      unoptimized={media.src.endsWith(".gif")}
-      className="object-cover grayscale"
+      // GIFs would lose their animation and SVGs can't be optimised.
+      unoptimized={/\.(gif|svg)$/i.test(media.src)}
+      className={`grayscale ${fitClass}`}
     />
   );
 }
