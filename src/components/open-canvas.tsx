@@ -30,8 +30,6 @@ const CLUSTER = { w: 768, top: -322, bottom: 284 };
 // Masonry layout: uniform column width and gap, in world px.
 const COL = 260;
 const GAP = 24;
-// The minimap appears once zoomed in past the fitted scale by this much.
-const MINIMAP_ZOOM = 1.15;
 
 const ALL = new Set<Category>(CATEGORIES.map((c) => c.id));
 const CATEGORY_ORDER: Category[] = ["key-project", "side-project", "exploration"];
@@ -101,7 +99,6 @@ export function OpenCanvas() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<View>({ x: 0, y: 0, s: 1 });
   const [size, setSize] = useState({ w: 0, h: 0 });
-  const [fitScale, setFitScale] = useState(1);
   const [positions, setPositions] = useState<Record<string, Point>>(initialPositions);
   const [order, setOrder] = useState<string[]>(initialOrder);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -171,13 +168,11 @@ export function OpenCanvas() {
         ? (width - 32) / CLUSTER.w
         : Math.min(width / (CLUSTER.w + 320), height / (CLUSTER.bottom - CLUSTER.top + 120));
     const s = clamp(fitScene, MIN_SCALE, 1);
-    setFitScale(s);
     setView({ x: width / 2, y: height / 2 - ((CLUSTER.top + CLUSTER.bottom) / 2) * s, s });
   }, []);
 
   const fitGrid = (width: number, gridWidth: number) => {
     const s = clamp((width - 32) / gridWidth, MIN_SCALE, 1);
-    setFitScale(s);
     setView({ x: width / 2, y: 32, s });
   };
 
@@ -352,6 +347,15 @@ export function OpenCanvas() {
     return { id, w, visible, pos, width, height };
   });
 
+  // The visible area in world px, and whether any shown work lies outside it.
+  // The minimap shows whenever there's more canvas than fits on screen.
+  const viewport = { x: -view.x / view.s, y: -view.y / view.s, w: size.w / view.s, h: size.h / view.s };
+  const offscreen = placed.some(
+    (p) =>
+      p.visible &&
+      (p.pos.x < viewport.x || p.pos.y < viewport.y || p.pos.x + p.width > viewport.x + viewport.w || p.pos.y + p.height > viewport.y + viewport.h),
+  );
+
   const minimapRects: Rect[] = placed
     .filter((p) => p.visible)
     .map((p) => ({ id: p.id, x: p.pos.x, y: p.pos.y, w: p.width, h: p.height, strong: p.w?.category === "key-project" }));
@@ -439,8 +443,8 @@ export function OpenCanvas() {
       <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2 sm:bottom-6 sm:right-6">
         <CanvasMinimap
           rects={minimapRects}
-          viewport={{ x: -view.x / view.s, y: -view.y / view.s, w: size.w / view.s, h: size.h / view.s }}
-          visible={ready && view.s > fitScale * MINIMAP_ZOOM}
+          viewport={viewport}
+          visible={ready && offscreen}
           onNavigate={navigate}
         />
         <div
