@@ -39,14 +39,25 @@ const CATEGORY_ORDER: Category[] = ["key-project", "side-project", "exploration"
 const NOTE_WIDTH = 170;
 const KEYS = work.filter((w) => w.category === "key-project");
 const keyRects = KEYS.map((w) => ({ x: w.x ?? 0, y: w.y ?? 0, w: widthOf(w), h: cardHeight(w, widthOf(w)) }));
-const packed = pack(
-  keyRects,
-  [
-    { id: "note", w: NOTE_WIDTH, h: NOTE_HEIGHT },
-    ...work.filter((w) => w.category !== "key-project").map((w) => ({ id: w.id, w: widthOf(w), h: cardHeight(w, widthOf(w)) })),
-  ],
-  { gap: 28, top: 28, stretch: 1.6, snap: 4 },
-);
+// The four sides around the cluster: right, down, left, up.
+const SIDES = [0, Math.PI / 2, Math.PI, -Math.PI / 2];
+// Videos closest to the key projects, then images, then cards without media.
+// Within each, the most eye-catching first; then each card is dealt to the
+// next side in turn, so every side gets an even share of highlights, solid
+// pieces and plain ones, and grows outward at the same pace.
+const kind = (w: (typeof work)[number]) => (w.media?.type === "video" ? 0 : w.media ? 1 : 2);
+const ringed = work
+  .filter((w) => w.category !== "key-project")
+  .map((w, i) => ({ w, i }))
+  .sort((a, b) => kind(a.w) - kind(b.w) || (a.w.interest ?? 3) - (b.w.interest ?? 3) || a.i - b.i)
+  .map(({ w }, n) => ({ id: w.id, w: widthOf(w), h: cardHeight(w, widthOf(w)), angle: SIDES[n % 4] }));
+const packed = pack(keyRects, [{ id: "note", w: NOTE_WIDTH, h: NOTE_HEIGHT }, ...ringed], {
+  gap: 28,
+  top: 28,
+  stretch: 1.6,
+  snap: 4,
+  spread: Math.PI / 4,
+});
 const ITEMS: { id: string; x: number; y: number; w: number }[] = [
   { id: "note", ...packed.note, w: NOTE_WIDTH },
   ...work.map((w) => ({ id: w.id, ...(w.x !== undefined && w.y !== undefined ? { x: w.x, y: w.y } : packed[w.id]), w: widthOf(w) })),
@@ -108,6 +119,8 @@ export function OpenCanvas() {
   const [layout, setLayout] = useState<Layout>("scatter");
   const [animating, setAnimating] = useState(false);
   const [ready, setReady] = useState(false);
+  // The fitted view the canvas opens on (or was last reset to).
+  const [home, setHome] = useState<View>({ x: 0, y: 0, s: 1 });
   const viewRef = useRef(view);
   useEffect(() => {
     viewRef.current = view;
@@ -168,12 +181,16 @@ export function OpenCanvas() {
         ? (width - 32) / CLUSTER.w
         : Math.min(width / (CLUSTER.w + 320), height / (CLUSTER.bottom - CLUSTER.top + 120));
     const s = clamp(fitScene, MIN_SCALE, 1);
-    setView({ x: width / 2, y: height / 2 - ((CLUSTER.top + CLUSTER.bottom) / 2) * s, s });
+    const fit = { x: width / 2, y: height / 2 - ((CLUSTER.top + CLUSTER.bottom) / 2) * s, s };
+    setView(fit);
+    setHome(fit);
   }, []);
 
   const fitGrid = (width: number, gridWidth: number) => {
     const s = clamp((width - 32) / gridWidth, MIN_SCALE, 1);
-    setView({ x: width / 2, y: 32, s });
+    const fit = { x: width / 2, y: 32, s };
+    setView(fit);
+    setHome(fit);
   };
 
   // Track the canvas size; fit once it is first measured, then reveal.
@@ -348,13 +365,16 @@ export function OpenCanvas() {
   });
 
   // The visible area in world px, and whether any shown work lies outside it.
-  // The minimap shows whenever there's more canvas than fits on screen.
+  // The minimap shows once someone pans or zooms away from the opening view,
+  // and only while there's more canvas than fits on screen.
   const viewport = { x: -view.x / view.s, y: -view.y / view.s, w: size.w / view.s, h: size.h / view.s };
   const offscreen = placed.some(
     (p) =>
       p.visible &&
       (p.pos.x < viewport.x || p.pos.y < viewport.y || p.pos.x + p.width > viewport.x + viewport.w || p.pos.y + p.height > viewport.y + viewport.h),
   );
+
+  const moved = Math.abs(view.x - home.x) > 2 || Math.abs(view.y - home.y) > 2 || Math.abs(view.s - home.s) > 0.001;
 
   const minimapRects: Rect[] = placed
     .filter((p) => p.visible)
@@ -444,7 +464,7 @@ export function OpenCanvas() {
         <CanvasMinimap
           rects={minimapRects}
           viewport={viewport}
-          visible={ready && offscreen}
+          visible={ready && offscreen && moved}
           onNavigate={navigate}
         />
         <div
