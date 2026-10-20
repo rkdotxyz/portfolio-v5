@@ -92,6 +92,16 @@ body {
   to { stroke-dashoffset: -8; }
 }
 
+/* Scan line sweeping a key project card down and back while it is hovered. */
+.group:hover .key-scan {
+  animation: key-scan 1.6s ease-in-out infinite alternate;
+}
+/* The band is 5rem tall; its centre line travels from the top edge to the bottom. */
+@keyframes key-scan {
+  from { top: -2.5rem; }
+  to { top: calc(100% - 2.5rem); }
+}
+
 /* Case study panel sliding in from the right. */
 .drawer-in[open] {
   animation: drawer-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -119,6 +129,7 @@ body {
   .toast-in,
   .detect-in,
   .marching-ants,
+  .group:hover .key-scan,
   .drawer-in[open],
   .drawer-in[open]::backdrop,
   .gen-rings,

@@ -75,20 +75,35 @@ const setProjectParam = (id: string | null, mode: "push" | "replace") => {
 const gridColumns = (width: number) =>
   width < 640 ? 2 : clamp(Math.floor((width - 96 + GAP) / (COL + GAP)), 2, 5);
 
-// Shown work packed into the shortest column, key projects first. Centred on
-// world x = 0, starting at world y = 0.
+// Key projects first, two across at the top (one across on narrow grids),
+// since their labels need the width;
+// then side projects and explorations packed into the shortest column.
+// Centred on world x = 0, starting at world y = 0.
+const LABEL_ROOM = 28; // space above a card for its detection label
 function masonry(cols: number, shown: Set<Category>) {
   const total = cols * COL + (cols - 1) * GAP;
   const x0 = -total / 2;
+  const perRow = cols > 2 ? 2 : 1;
+  const keyWidth = (total - GAP * (perRow - 1)) / perRow;
   const positions: Record<string, Point> = {};
-  const colY = Array<number>(cols).fill(0);
-  const items = CATEGORY_ORDER.flatMap((c) => work.filter((w) => w.category === c && shown.has(c)));
-  for (const w of items) {
+
+  let y = 0;
+  const keys = work.filter((w) => w.category === "key-project" && shown.has(w.category));
+  keys.forEach((w, i) => {
+    positions[w.id] = { x: x0 + (i % perRow) * (keyWidth + GAP), y };
+    if (i % perRow === perRow - 1 || i === keys.length - 1) y += cardHeight(w.category, keyWidth) + LABEL_ROOM;
+  });
+
+  const colY = Array<number>(cols).fill(y);
+  const rest = CATEGORY_ORDER.filter((c) => c !== "key-project").flatMap((c) =>
+    work.filter((w) => w.category === c && shown.has(c)),
+  );
+  for (const w of rest) {
     const c = colY.indexOf(Math.min(...colY));
     positions[w.id] = { x: x0 + c * (COL + GAP), y: colY[c] };
     colY[c] += cardHeight(w.category, COL) + GAP;
   }
-  return { positions, width: total };
+  return { positions, width: total, keyWidth };
 }
 
 export function OpenCanvas() {
@@ -333,7 +348,7 @@ export function OpenCanvas() {
     const inGrid = layout === "grid";
     const visible = w ? shown.has(w.category) : !(inGrid && id === "note");
     const pos = inGrid && grid.positions[id] ? grid.positions[id] : positions[id];
-    const width = inGrid && w ? COL : item.w;
+    const width = inGrid && w ? (w.category === "key-project" ? grid.keyWidth : COL) : item.w;
     const height = w ? cardHeight(w.category, width) : NOTE_HEIGHT;
     return { id, w, visible, pos, width, height };
   });
@@ -342,7 +357,12 @@ export function OpenCanvas() {
     .filter((p) => p.visible)
     .map((p) => ({ id: p.id, x: p.pos.x, y: p.pos.y, w: p.width, h: p.height, strong: p.w?.category === "key-project" }));
 
-  const gridSize = GRID * view.s;
+  // Keep the dots the same size and roughly the same spacing at any zoom:
+  // the world grid doubles or halves to stay within a band around GRID on
+  // screen, like a design tool's canvas, while still moving with the pan.
+  let gridSize = GRID * view.s;
+  while (gridSize < GRID * 0.75) gridSize *= 2;
+  while (gridSize >= GRID * 1.5) gridSize /= 2;
   const ease = animating ? "transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]" : "";
 
   return (
