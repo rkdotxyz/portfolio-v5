@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { aspectOf, CATEGORY_LABEL, type Category, type WorkItem } from "@/content/work";
 import { DetectFrame } from "./detect-frame";
+import { LoopVideo } from "./loop-video";
 import { YouTubeEmbed } from "./youtube-embed";
 
 // Rendered height of a card at a given width: border, media, caption. Key
@@ -48,14 +49,14 @@ export function WorkCard({
             <>
               {/* Hover: the media wakes up and a scan line sweeps down and back
                   across its full width, as if the detector is reading the card. */}
-              <div className="absolute inset-0 brightness-75 transition-[scale,filter] duration-500 ease-out group-hover:scale-[1.04] group-hover:brightness-110">
+              <div className="absolute inset-0 brightness-75 transition-[scale,filter] duration-500 ease-out group-hover:scale-[1.04] group-hover:brightness-110 group-data-[active=true]:scale-[1.04] group-data-[active=true]:brightness-110">
                 <WorkMedia item={item} />
               </div>
               {/* A soft glow band with the line at its centre, so it reads the
                   same moving down or up. */}
               <span
                 aria-hidden
-                className="key-scan pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-transparent via-foreground/[0.16] to-transparent opacity-0 group-hover:opacity-100"
+                className="key-scan pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-transparent via-foreground/[0.16] to-transparent opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100"
               >
                 <span className="absolute inset-x-0 top-1/2 h-px bg-foreground/90 shadow-[0_0_10px_1px_rgb(245_245_245/0.45)]" />
               </span>
@@ -78,8 +79,8 @@ export function WorkCard({
           <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted">
             {isKey ? (
               <>
-                <span className="group-hover:hidden">{item.year}</span>
-                <span className="hidden text-foreground group-hover:inline">View case study →</span>
+                <span className="group-hover:hidden group-data-[active=true]:hidden">{item.year}</span>
+                <span className="hidden text-foreground group-hover:inline group-data-[active=true]:inline">View case study →</span>
               </>
             ) : (
               <>
@@ -195,17 +196,7 @@ export function WorkMedia({
     );
   }
   if (media.type === "video") {
-    return (
-      <video
-        src={media.src}
-        autoPlay
-        muted
-        loop
-        playsInline
-        draggable={false}
-        className={`absolute inset-0 h-full w-full ${fitClass}`}
-      />
-    );
+    return <LoopVideo src={media.src} className={`absolute inset-0 h-full w-full ${fitClass}`} />;
   }
   return (
     <Image

@@ -13,10 +13,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Absolute URLs for share images: the production domain on Vercel, or a
+// SITE_URL set by hand, falling back to local development.
+const siteUrl = process.env.SITE_URL
+  ? process.env.SITE_URL
+  : process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000";
+
+const description =
+  "Rama Krushna Behera, a creative technologist building things between the digital and the physical: LED matrices, pen plotters, installations and the code behind them.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "rkdotxyz — Creative Technologist",
-  description:
-    "Portfolio of Rama Krushna Behera, a senior product designer turning creative technologist.",
+  description,
+  openGraph: {
+    type: "website",
+    siteName: "rkdotxyz",
+    title: "rkdotxyz — Creative Technologist",
+    description,
+  },
+  twitter: { card: "summary_large_image", creator: "@rkdotxyz" },
 };
 
 export const viewport: Viewport = {

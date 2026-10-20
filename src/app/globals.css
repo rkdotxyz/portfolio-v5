@@ -86,7 +86,8 @@ body {
 }
 
 /* Scan line sweeping a key project card down and back while it is hovered. */
-.group:hover .key-scan {
+.group:hover .key-scan,
+.group[data-active="true"] .key-scan {
   animation: key-scan 1.6s ease-in-out infinite alternate;
 }
 /* The band is 5rem tall; its centre line travels from the top edge to the bottom. */
@@ -118,6 +119,7 @@ body {
   .callout-draw,
   .detect-in,
   .group:hover .key-scan,
+  .group[data-active="true"] .key-scan,
   .gen-rings,
   .gen-stripes,
   .gen-dots,

@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { widthOf, work, type Category } from "@/content/work";
+import { CATEGORY_LABEL, widthOf, work, type Category, type WorkItem } from "@/content/work";
 import { pack } from "@/lib/pack";
 import { play, type SoundName } from "@/lib/sound";
 import { CanvasFilter, CATEGORIES } from "./canvas-filter";
@@ -115,6 +115,8 @@ export function OpenCanvas() {
   const [activeId, setActiveId] = useState<string | null>(null);
   // A side project or exploration whose callout is held open by a tap.
   const [pinnedId, setPinnedId] = useState<string | null>(null);
+  // The card focused from the keyboard: framed like a hovered one.
+  const [focusedId, setFocusedId] = useState<string | null>(null);
   const [shown, setShown] = useState<Set<Category>>(ALL);
   const [layout, setLayout] = useState<Layout>("scatter");
   const [animating, setAnimating] = useState(false);
@@ -395,6 +397,13 @@ export function OpenCanvas() {
     >
       {/* The page's heading; the canvas itself is visual. */}
       <h1 className="sr-only">Rama Krushna Behera, creative technologist: selected work</h1>
+      {/* Lets keyboard users jump past the 50 cards. */}
+      <a
+        href="#about"
+        className="sr-only z-50 bg-foreground px-3 py-2 font-mono text-xs uppercase tracking-wider text-background focus:not-sr-only focus:absolute focus:left-4 focus:top-4"
+      >
+        Skip past the work
+      </a>
       <div
         ref={rootRef}
         onPointerDown={onBgDown}
@@ -412,7 +421,7 @@ export function OpenCanvas() {
           className={`absolute left-0 top-0 origin-top-left ${ease} ${ready ? "opacity-100" : "opacity-0"}`}
           style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.s})` }}
         >
-          {placed.map(({ id, w, visible, pos, width }) => {
+          {placed.map(({ id, w, visible, pos, width, height }) => {
             const draggable = layout === "scatter" && visible;
             const isKey = w?.category === "key-project";
             const pinned = pinnedId === id;
@@ -427,17 +436,51 @@ export function OpenCanvas() {
               <div
                 key={id}
                 data-work-id={w ? id : undefined}
+                // Keyboard: Tab between cards, Enter or Space opens them, as a click would.
+                tabIndex={w && visible ? 0 : undefined}
+                role={w ? "button" : undefined}
+                aria-label={w ? describe(w) : undefined}
+                onKeyDown={
+                  w
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openProject(id, "mouse");
+                        }
+                      }
+                    : undefined
+                }
+                onFocus={
+                  w
+                    ? (e) => {
+                        // Only keyboard focus; a click shouldn't leave the frame behind.
+                        if (!e.currentTarget.matches(":focus-visible")) return;
+                        setFocusedId(id);
+                        // Bring a card focused off screen into view.
+                        const outside =
+                          pos.x * view.s + view.x < 0 ||
+                          (pos.x + width) * view.s + view.x > size.w ||
+                          pos.y * view.s + view.y < 0 ||
+                          (pos.y + height) * view.s + view.y > size.h;
+                        if (outside) {
+                          animate();
+                          navigate(pos.x + width / 2, pos.y + height / 2);
+                        }
+                      }
+                    : undefined
+                }
+                onBlur={w ? () => setFocusedId((f) => (f === id ? null : f)) : undefined}
                 onPointerDown={draggable ? onCardDown(id) : undefined}
                 onPointerMove={draggable ? onCardMove : undefined}
                 onPointerUp={draggable ? onCardUp : undefined}
                 onPointerCancel={draggable ? onCardUp : undefined}
-                className={`absolute hover:z-30 ${pinned ? "z-30" : ""} ${
+                className={`absolute outline-none hover:z-30 ${pinned || focusedId === id ? "z-30" : ""} ${
                   animating ? ease : "transition-opacity duration-300"
                 } ${draggable ? "cursor-move touch-none" : isKey || w?.url ? "cursor-pointer" : ""} ${visible ? "" : hidden}`}
                 style={{ left: pos.x, top: pos.y, width }}
               >
                 {w ? (
-                  <WorkCard item={w} active={activeId === id || pinned} callout={callout} scale={view.s} />
+                  <WorkCard item={w} active={activeId === id || pinned || focusedId === id} callout={callout} scale={view.s} />
                 ) : (
                   <NoteCard />
                 )}
@@ -551,4 +594,12 @@ function NoteCard() {
       psst, drag anything ↗
     </div>
   );
+}
+
+// What a screen reader hears for a card: its name and kind, what it is, and
+// what activating it does.
+function describe(w: WorkItem) {
+  const action =
+    w.category === "key-project" ? "Opens the case study." : w.url ? "Opens the live site in a new tab." : "Shows its description.";
+  return [`${w.title}, ${CATEGORY_LABEL[w.category]}${w.wip ? ", in progress" : ""}.`, w.about, action].filter(Boolean).join(" ");
 }
