@@ -9,24 +9,22 @@ import { DetectFrame } from "./detect-frame";
 // locked-on detections.
 const groups: (ToolGroup & { untried?: boolean })[] = [
   ...toolGroups,
-  { id: "exploring", label: "Exploring next", code: "untried", tools: exploring, untried: true },
+  { id: "exploring", label: "Exploring next", tools: exploring, untried: true },
 ];
 
 // Every tool once, interleaved across groups so a detected group lights up
 // chips scattered through the field rather than one block.
 const chips = (() => {
-  const out: { name: string; group: string; code: string; confidence: string; untried: boolean }[] = [];
+  const out: { name: string; group: string; label: string; untried: boolean }[] = [];
   const longest = Math.max(...groups.map((g) => g.tools.length));
   for (let i = 0; i < longest; i++) {
     for (const g of groups) {
       const name = g.tools[i];
       if (!name) continue;
-      const n = [...name].reduce((sum, c) => sum + c.charCodeAt(0), 0);
       out.push({
         name,
         group: g.id,
-        code: g.code,
-        confidence: (0.86 + (n % 13) / 100).toFixed(2),
+        label: g.label,
         untried: !!g.untried,
       });
     }
@@ -106,7 +104,7 @@ export function Toolkit() {
 
       <div className="overflow-hidden border border-line">
         <div
-          className="flex min-h-64 flex-wrap content-start gap-x-3 gap-y-6 p-5 pt-8 sm:gap-x-4 sm:p-8 sm:pt-10"
+          className="flex min-h-64 flex-wrap content-start gap-x-3 gap-y-8 p-5 pt-10 sm:gap-x-4 sm:p-8 sm:pt-12"
           style={{
             backgroundImage: "radial-gradient(circle, var(--faint) 1px, transparent 1.2px)",
             backgroundSize: "24px 24px",
@@ -136,7 +134,7 @@ export function Toolkit() {
                   hit ? "border-transparent opacity-100" : "border-line opacity-35 hover:opacity-100"
                 }`}
               >
-                {hit ? <DetectFrame visible label={`${c.code} ${c.confidence}`} /> : <DetectFrame label={c.code} />}
+                <DetectFrame visible={hit} label={c.label.toLowerCase()} />
                 {c.name}
               </span>
             );
@@ -186,7 +184,7 @@ function SearchFrame({ active, label }: { active: boolean; label?: string }) {
       {label && (
         <span
           aria-hidden
-          className={`absolute -left-px bottom-full mb-[3px] whitespace-nowrap border border-dashed px-1.5 py-1 font-mono text-[10px] not-italic leading-none ${
+          className={`absolute -left-px bottom-full whitespace-nowrap border border-dashed px-1.5 py-[3px] font-mono text-[10px] not-italic leading-none ${
             active ? "border-foreground text-foreground" : "border-faint text-muted opacity-0 group-hover:opacity-100"
           }`}
         >

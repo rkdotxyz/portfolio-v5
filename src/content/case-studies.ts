@@ -22,6 +22,32 @@ export type CaseStudy = {
 };
 
 export const caseStudies: Record<string, CaseStudy> = {
+  "planet-under-pressure": {
+    summary: "An interactive data-art installation: turn eight knobs and watch a planet change.",
+    status: "Shown at VizChitra 2025",
+    what: "A planet built from environmental data. Each knob on a MIDI controller drives one measure of the planet's health across 201 years, and the planet's colour, texture and balance of land and water shift as you turn it.",
+    why: "Data about the environment usually lives in charts, which take a certain data literacy to read. The question was how to make that data interactive and visual for everyone, from designers and journalists to professors, students and artists.",
+    how: "Eight parameters, one per knob: air quality, water quality, sea level rise, ocean temperature anomaly, land pollution, jet stream fluctuation, loss of living life and vegetation loss. A hundred years of open data per parameter was extended with a predicted hundred years ahead. The planet is built in TouchDesigner with its functions left configurable, and each knob is mapped to several of them; one knob moves blur radius, noise amplitude and hue together. The mappings were tested so no two knobs fight over the same value.",
+    flow: ["Open data · 201 years", "8 parameters", "MIDI knobs", "TouchDesigner", "Planet"],
+    stack: ["TouchDesigner", "MIDI controller", "Open datasets", "Data mapping"],
+    outcome: "Presented at VizChitra 2025 to 50+ people. The takeaway from the room: data is more than graphs and charts, and people understand it better by interacting with it than by reading numbers.",
+  },
+  "blade-design-system": {
+    summary: "The design system that powers Razorpay's products.",
+    role: "Product designer to senior product designer, design systems",
+    team: "Blade design systems team, Razorpay",
+    status: "2022–2026",
+    what: "Blade is Razorpay's design system, used across 75+ products in the dashboard, checkout, mobile app and POS, by 60+ designers and 100+ frontend engineers across 6–8 business verticals.",
+    why: "As teams scaled, products drifted apart visually and in how they behaved, designers and developers went back and forth before every launch, and teams kept building one-off versions of what should have been reusable patterns.",
+    how: "Designed 30+ components end to end, from research and API decisions to delivery, and defined the motion of 32 of them. Added design patterns, built the foundations of a data visualisation system, and built Figma plugins including Pattern Creator. On the AI side: built blade-runner, an agent that answers consumers' questions, and rewrote the system's knowledge base for AI agents, improving MCP accuracy by about 25%.",
+    flow: ["Tokens & foundations", "Components", "Patterns", "Figma plugins", "AI agent + MCP", "75+ products"],
+    stack: ["Figma", "Figma plugin API", "Design tokens", "React", "Motion design", "AI agents", "MCP", "Amplitude"],
+    outcome: "Component coverage up 40%, with an estimated $60k and 2,000+ hours saved. Pattern Creator saves about 70% of the time for its ~5 daily users; blade-runner answers with 94% accuracy for ~10 daily users. Two brand refreshes landed without breaking changes, and the open-sourced Figma library passed 14k downloads.",
+    links: [
+      { label: "Blade", href: "https://blade.razorpay.com" },
+      { label: "Code", href: "https://github.com/razorpay/blade" },
+    ],
+  },
   "gesture-bloom": {
     summary: "Open your hand, and a paper flower opens with it.",
     status: "In progress",

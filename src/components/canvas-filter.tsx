@@ -5,7 +5,7 @@ import { work, type Category } from "@/content/work";
 
 export const CATEGORIES: { id: Category; label: string }[] = [
   { id: "key-project", label: "Key projects" },
-  { id: "project", label: "Projects" },
+  { id: "side-project", label: "Side projects" },
   { id: "exploration", label: "Explorations" },
 ];
 
@@ -79,14 +79,6 @@ export function CanvasFilter({
                         : "border-dashed border-faint text-muted hover:border-muted hover:text-foreground"
                     }`}
                   >
-                    {on && (
-                      <>
-                        <Corner className="-left-px -top-px border-l-2 border-t-2" />
-                        <Corner className="-right-px -top-px border-r-2 border-t-2" />
-                        <Corner className="-bottom-px -left-px border-b-2 border-l-2" />
-                        <Corner className="-bottom-px -right-px border-b-2 border-r-2" />
-                      </>
-                    )}
                     <span>{c.label}</span>
                     <span
                       className={`px-1.5 py-1 font-mono text-[10px] leading-none tabular-nums ${
@@ -119,8 +111,4 @@ export function CanvasFilter({
       </button>
     </div>
   );
-}
-
-function Corner({ className }: { className: string }) {
-  return <span aria-hidden className={`absolute h-2.5 w-2.5 border-foreground ${className}`} />;
 }

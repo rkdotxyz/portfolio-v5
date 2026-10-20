@@ -14,14 +14,12 @@ export const about = {
   ],
 };
 
-export type ToolGroup = { id: string; label: string; code: string; tools: string[] };
+export type ToolGroup = { id: string; label: string; tools: string[] };
 
-// `code` is the short class name shown in the detection tag.
 export const toolGroups: ToolGroup[] = [
   {
     id: "design",
     label: "Design",
-    code: "design",
     tools: [
       "Figma",
       "Framer",
@@ -39,7 +37,6 @@ export const toolGroups: ToolGroup[] = [
   {
     id: "creative-code",
     label: "Creative code",
-    code: "creative_code",
     tools: [
       "TouchDesigner",
       "p5.js",
@@ -56,19 +53,16 @@ export const toolGroups: ToolGroup[] = [
   {
     id: "physical",
     label: "Physical computing",
-    code: "hardware",
     tools: ["Arduino", "ESP32", "Raspberry Pi", "Sensors", "LED strips", "MIDI controllers", "Pen plotter", "Light painting"],
   },
   {
     id: "web",
     label: "Web",
-    code: "web",
     tools: ["HTML", "CSS", "JavaScript", "TypeScript", "React", "Next.js", "Tailwind CSS", "Git & GitHub", "Vercel"],
   },
   {
     id: "ai",
     label: "AI tooling",
-    code: "ai",
     tools: [
       "Claude",
       "Claude Code",

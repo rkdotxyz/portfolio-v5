@@ -4,19 +4,23 @@ import { DetectFrame } from "./detect-frame";
 
 const ASPECT: Record<Category, string> = {
   "key-project": "aspect-[16/10]",
-  project: "aspect-[4/3]",
+  "side-project": "aspect-[4/3]",
   exploration: "aspect-square",
 };
-const RATIO: Record<Category, number> = { "key-project": 16 / 10, project: 4 / 3, exploration: 1 };
+const RATIO: Record<Category, number> = { "key-project": 16 / 10, "side-project": 4 / 3, exploration: 1 };
 
 // Rendered height of a card at a given width: border + padding, media, caption.
 // Keep in sync with the classes below; the canvas uses it for layout and the minimap.
 export const cardHeight = (category: Category, width: number) =>
   2 + 16 + (width - 18) / RATIO[category] + 32;
 
-// A card of work on the canvas. Hover (or press, on touch) frames the whole
-// card in a MediaPipe-style detection box with a labelled tag.
+const SHORT: Record<Category, string> = { "key-project": "key", "side-project": "side", exploration: "exp" };
+
+// A card of work on the canvas. Key projects carry an always-on detection
+// frame tagged with the kinds of work; other cards get one on hover (or press,
+// on touch) tagged with their category.
 export function WorkCard({ item, active }: { item: WorkItem; active: boolean }) {
+  const isKey = item.category === "key-project";
   return (
     <article data-active={active} data-sound-hover className="group relative">
       <div className="border border-line bg-surface p-2">
@@ -24,14 +28,18 @@ export function WorkCard({ item, active }: { item: WorkItem; active: boolean }) 
           <WorkMedia item={item} />
         </div>
         <div className="flex h-8 items-center justify-between gap-2 px-1 pt-1">
-          <h3 className="truncate text-sm">{item.title}</h3>
+          <h3 className={`truncate ${isKey ? "text-base" : "text-sm"}`}>{item.title}</h3>
           <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted">
-            {item.year ?? "exp"}
+            {item.year ?? SHORT[item.category]}
           </span>
         </div>
       </div>
 
-      <DetectFrame label={`${CATEGORY_LABEL[item.category]} ${item.confidence.toFixed(2)}`} />
+      {isKey && item.tags ? (
+        <DetectFrame visible label={item.tags} />
+      ) : (
+        <DetectFrame label={CATEGORY_LABEL[item.category]} />
+      )}
     </article>
   );
 }

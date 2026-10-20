@@ -9,7 +9,6 @@ import {
   useSyncExternalStore,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
-  type Ref,
 } from "react";
 import { work, type Category } from "@/content/work";
 import { play, type SoundName } from "@/lib/sound";
@@ -25,8 +24,9 @@ type Layout = "scatter" | "grid";
 const MIN_SCALE = 0.3;
 const MAX_SCALE = 2.5;
 const GRID = 24;
-const INTRO_WIDTH = 460;
 const NOTE_HEIGHT = 44;
+// The 2×2 key project cluster at the centre, including the tags above it.
+const CLUSTER = { w: 768, top: -322, bottom: 284 };
 // Masonry layout: uniform column width and gap, in world px.
 const COL = 260;
 const GAP = 24;
@@ -34,12 +34,11 @@ const GAP = 24;
 const MINIMAP_ZOOM = 1.15;
 
 const ALL = new Set<Category>(CATEGORIES.map((c) => c.id));
-const CATEGORY_ORDER: Category[] = ["key-project", "project", "exploration"];
+const CATEGORY_ORDER: Category[] = ["key-project", "side-project", "exploration"];
 
 // Every draggable thing on the canvas, with its scattered starting position.
 const ITEMS: { id: string; x: number; y: number; w: number }[] = [
-  { id: "intro", x: -INTRO_WIDTH / 2, y: -130, w: INTRO_WIDTH },
-  { id: "note", x: 260, y: -150, w: 170 },
+  { id: "note", x: -440, y: 330, w: 170 },
   ...work.map(({ id, x, y, w }) => ({ id, x, y, w })),
 ];
 const itemById = new Map(ITEMS.map((i) => [i.id, i]));
@@ -76,13 +75,13 @@ const setProjectParam = (id: string | null, mode: "push" | "replace") => {
 const gridColumns = (width: number) =>
   width < 640 ? 2 : clamp(Math.floor((width - 96 + GAP) / (COL + GAP)), 2, 5);
 
-// Intro across the top, then shown work packed into the shortest column,
-// key projects first. Centred on world x = 0, starting at world y = 0.
-function masonry(cols: number, introH: number, shown: Set<Category>) {
+// Shown work packed into the shortest column, key projects first. Centred on
+// world x = 0, starting at world y = 0.
+function masonry(cols: number, shown: Set<Category>) {
   const total = cols * COL + (cols - 1) * GAP;
   const x0 = -total / 2;
-  const positions: Record<string, Point> = { intro: { x: x0, y: 0 } };
-  const colY = Array<number>(cols).fill(introH + GAP * 2);
+  const positions: Record<string, Point> = {};
+  const colY = Array<number>(cols).fill(0);
   const items = CATEGORY_ORDER.flatMap((c) => work.filter((w) => w.category === c && shown.has(c)));
   for (const w of items) {
     const c = colY.indexOf(Math.min(...colY));
@@ -94,11 +93,9 @@ function masonry(cols: number, introH: number, shown: Set<Category>) {
 
 export function OpenCanvas() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const introRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<View>({ x: 0, y: 0, s: 1 });
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [fitScale, setFitScale] = useState(1);
-  const [introH, setIntroH] = useState(220);
   const [positions, setPositions] = useState<Record<string, Point>>(initialPositions);
   const [order, setOrder] = useState<string[]>(initialOrder);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -149,17 +146,20 @@ export function OpenCanvas() {
   };
 
   const grid = useMemo(
-    () => masonry(gridColumns(size.w), introH, shown),
-    [size.w, introH, shown],
+    () => masonry(gridColumns(size.w), shown),
+    [size.w, shown],
   );
 
   const fitScatter = useCallback((width: number, height: number) => {
-    // Desktop: fit the whole scene. Phones: fit the intro card to the width and
-    // let the work be found by panning.
-    const fitScene = width < 640 ? (width - 32) / INTRO_WIDTH : Math.min(width / 1900, height / 1040);
+    // Fit the key project cluster with room around it, so side projects and
+    // explorations peek in from the edges as an invitation to pan.
+    const fitScene =
+      width < 640
+        ? (width - 32) / CLUSTER.w
+        : Math.min(width / (CLUSTER.w + 320), height / (CLUSTER.bottom - CLUSTER.top + 120));
     const s = clamp(fitScene, MIN_SCALE, 1);
     setFitScale(s);
-    setView({ x: width / 2, y: height / 2, s });
+    setView({ x: width / 2, y: height / 2 - ((CLUSTER.top + CLUSTER.bottom) / 2) * s, s });
   }, []);
 
   const fitGrid = (width: number, gridWidth: number) => {
@@ -177,7 +177,6 @@ export function OpenCanvas() {
       setSize({ w: width, h: height });
       if (!fitted.current) {
         fitted.current = true;
-        if (introRef.current) setIntroH(introRef.current.offsetHeight);
         fitScatter(width, height);
         setReady(true);
       }
@@ -335,13 +334,13 @@ export function OpenCanvas() {
     const visible = w ? shown.has(w.category) : !(inGrid && id === "note");
     const pos = inGrid && grid.positions[id] ? grid.positions[id] : positions[id];
     const width = inGrid && w ? COL : item.w;
-    const height = w ? cardHeight(w.category, width) : id === "intro" ? introH : NOTE_HEIGHT;
+    const height = w ? cardHeight(w.category, width) : NOTE_HEIGHT;
     return { id, w, visible, pos, width, height };
   });
 
   const minimapRects: Rect[] = placed
     .filter((p) => p.visible)
-    .map((p) => ({ id: p.id, x: p.pos.x, y: p.pos.y, w: p.width, h: p.height, strong: p.id === "intro" || p.w?.category === "key-project" }));
+    .map((p) => ({ id: p.id, x: p.pos.x, y: p.pos.y, w: p.width, h: p.height, strong: p.w?.category === "key-project" }));
 
   const gridSize = GRID * view.s;
   const ease = animating ? "transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]" : "";
@@ -351,6 +350,8 @@ export function OpenCanvas() {
       aria-label="Open canvas"
       className="relative h-[calc(100svh-3.5rem-3rem)] w-full overflow-clip border-b border-line sm:h-[calc(100svh-4rem-3rem)]"
     >
+      {/* The page's heading; the canvas itself is visual. */}
+      <h1 className="sr-only">Rama Krushna Behera, creative technologist: selected work</h1>
       <div
         ref={rootRef}
         onPointerDown={onBgDown}
@@ -386,8 +387,6 @@ export function OpenCanvas() {
               >
                 {w ? (
                   <WorkCard item={w} active={activeId === id} />
-                ) : id === "intro" ? (
-                  <IntroCard ref={introRef} />
                 ) : (
                   <NoteCard />
                 )}
@@ -496,25 +495,10 @@ function ScatterIcon() {
   );
 }
 
-function IntroCard({ ref }: { ref: Ref<HTMLDivElement> }) {
-  return (
-    <div ref={ref} className="rounded-xl border border-faint bg-background p-6 sm:p-8">
-      <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Rama Krushna Behera</p>
-      <h1 className="mt-3 text-2xl font-medium leading-tight tracking-tight sm:text-3xl">
-        Designing and building interactive things where design meets code.
-      </h1>
-      <p className="mt-4 text-sm leading-relaxed text-muted">
-        Creative technologist with a product design background. This canvas is open: drag the cards,
-        pan around, zoom in.
-      </p>
-    </div>
-  );
-}
-
 function NoteCard() {
   return (
     <div className="-rotate-3 rounded-sm bg-foreground px-4 py-3 font-mono text-xs text-background">
-      psst, hover a card ↘
+      psst, drag anything ↗
     </div>
   );
 }

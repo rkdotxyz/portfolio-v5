@@ -1,8 +1,10 @@
-// MediaPipe-style detection frame: a 1px box with corner brackets flush
-// against it and an optional tag above the top-left corner.
+// Object-detection frame: a thin white box with solid label tabs sitting
+// flush on its top-left edge, like a detector's bounding box. Several labels
+// render as separate segments.
 // Place inside a `relative group` parent. It shows on group hover, or when
 // the parent has data-active="true", or always with `visible`.
-export function DetectFrame({ label, visible = false }: { label?: string; visible?: boolean }) {
+export function DetectFrame({ label, visible = false }: { label?: string | string[]; visible?: boolean }) {
+  const labels = label ? [label].flat() : [];
   // Hidden frames rest at full size (so they never overflow); showing plays
   // a short snap-in from slightly larger.
   const show = visible
@@ -13,19 +15,15 @@ export function DetectFrame({ label, visible = false }: { label?: string; visibl
       aria-hidden
       className={`pointer-events-none absolute inset-0 z-10 border border-foreground transition-opacity duration-200 ${show}`}
     >
-      <Corner className="-left-[2px] -top-[2px] border-l-2 border-t-2" />
-      <Corner className="-right-[2px] -top-[2px] border-r-2 border-t-2" />
-      <Corner className="-bottom-[2px] -left-[2px] border-b-2 border-l-2" />
-      <Corner className="-bottom-[2px] -right-[2px] border-b-2 border-r-2" />
-      {label && (
-        <span className="absolute -left-[2px] bottom-full mb-[2px] whitespace-nowrap bg-foreground px-1.5 py-1 font-mono text-[10px] leading-none text-background">
-          {label}
+      {labels.length > 0 && (
+        <span className="absolute -left-px bottom-full flex gap-px whitespace-nowrap">
+          {labels.map((l) => (
+            <span key={l} className="bg-foreground px-2 py-[5px] font-mono text-[13px] leading-none text-background">
+              {l}
+            </span>
+          ))}
         </span>
       )}
     </span>
   );
-}
-
-function Corner({ className }: { className: string }) {
-  return <span className={`absolute h-3 w-3 border-foreground ${className}`} />;
 }

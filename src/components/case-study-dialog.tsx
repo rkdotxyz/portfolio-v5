@@ -53,8 +53,12 @@ export function CaseStudyDialog({
         <div ref={scrollRef} className="h-full overflow-y-auto overscroll-contain">
           {/* Top bar */}
           <div className="sticky top-0 z-20 flex h-14 items-center justify-between gap-4 border-b border-line bg-background/90 px-4 backdrop-blur sm:px-6">
-            <span className="bg-foreground px-1.5 py-1 font-mono text-[10px] leading-none text-background">
-              {CATEGORY_LABEL[item.category]} {item.confidence.toFixed(2)}
+            <span className="flex gap-px">
+              {(item.tags ?? [CATEGORY_LABEL[item.category]]).map((t) => (
+                <span key={t} className="bg-foreground px-2 py-[5px] font-mono text-xs leading-none text-background">
+                  {t}
+                </span>
+              ))}
             </span>
             <div className="flex items-center gap-1">
               <IconButton label={`Previous: ${prev!.title}`} onClick={() => onOpen(prev!.id)}>
