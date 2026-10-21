@@ -16,7 +16,7 @@ export function DetectFrame({ label, visible = false }: { label?: string | strin
       className={`pointer-events-none absolute inset-0 z-10 border border-foreground transition-opacity duration-200 ${show}`}
     >
       {labels.length > 0 && (
-        <span className="absolute -left-px bottom-full flex gap-px whitespace-nowrap">
+        <span data-detect-label className="absolute -left-px bottom-full flex gap-px whitespace-nowrap">
           {labels.map((l) => (
             <span key={l} className="bg-foreground px-2 py-[5px] font-mono text-[13px] leading-none text-background">
               {l}

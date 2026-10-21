@@ -421,6 +421,11 @@ export function OpenCanvas() {
         }}
       >
         <div
+          // The current view, read by the cursor for its coordinate readout.
+          data-canvas-world
+          data-x={view.x}
+          data-y={view.y}
+          data-s={view.s}
           className={`absolute left-0 top-0 origin-top-left ${ease} ${ready ? "opacity-100" : "opacity-0"}`}
           style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.s})` }}
         >

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { CustomCursor } from "@/components/custom-cursor";
 import { SoundLayer } from "@/components/sound-layer";
 import "./globals.css";
 
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* clip (not hidden) so the sticky header keeps working */}
         <div className="flex min-h-full flex-col overflow-x-clip">{children}</div>
         <SoundLayer />
+        <CustomCursor />
       </body>
     </html>
   );

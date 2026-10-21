@@ -132,3 +132,28 @@ body {
   background: var(--foreground);
   color: var(--background);
 }
+
+/* Custom cursor (custom-cursor.tsx): the system cursor hides only once the
+   custom one is running, on mouse/trackpad devices. */
+.custom-cursor,
+.custom-cursor * {
+  cursor: none !important;
+}
+/* Its dot grows into a hollow ring over things you can click, and tightens
+   while the button is held. */
+.cursor-ring > span {
+  width: 6px;
+  height: 6px;
+  left: -3px;
+  top: -3px;
+}
+.cursor-ring[data-size="big"] > span {
+  width: 28px;
+  height: 28px;
+  left: -14px;
+  top: -14px;
+  background: transparent;
+}
+.cursor-root[data-pressed="true"] .cursor-ring > span {
+  transform: scale(0.75);
+}
