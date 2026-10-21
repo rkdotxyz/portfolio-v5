@@ -592,65 +592,177 @@ export const caseStudies: Record<string, CaseStudy> = {
     ],
   },
 
-  // From the repo (github.com/rkdotxyz/DM2601) and the group's Figma workbook.
+  // Written from the DM2601 repo (README, prototype docs: story, architecture,
+  // build log), the group's Figma workbook, the live app and customiser, and
+  // RK's answers on his role, the duration and the final crit.
   "heart-doll": {
     summary: "A doll whose heart glows when someone far away is there for you.",
+    subtitle: "A tangible way to stay close to home across time zones, at the end of the day",
     hero: { type: "video", src: "/work/heart-doll/hero.mp4", poster: "/work/heart-doll/glowing-heart.jpg", alt: "Rocky's heart pulsing on a desk" },
+    role: "Research and ideation with the team; I built all the tech: electronics, firmware, phone app and customiser",
     team: "KTH DM2601, group 11: Ellen Bäck, Max Kjellgren, Rama Krushna Behera, Roxanne Kick",
-    status: "Course project · HT26",
-    what: "Rocky, a soft doll by the bed for people who have moved abroad. It isn't designed to replace a phone or a messaging app. It makes availability tangible: its heart glows when someone far away is free, and a button in each foot answers back, heart for available and cross for not now. A quiet sense of presence across distance.",
-    why: "The course theme was rituals. We focused on the pre-sleep rituals of people who have moved abroad for work or study, and on one tension in them: wanting to share your day with family in another time zone, who are asleep by the time you're free.",
-    sections: [
-      {
-        title: "Research",
-        text: "Nine semi-structured interviews with people who had moved abroad, five to study and four to work. A literature review of twelve papers and a map of sleep technology showed that most tools treat sleep as something to track and optimise; we wanted the ritual before sleep, with ambient, screen-free modalities. An affinity diagram turned the interviews into a persona, Marie, 24, who moved from Seoul to Stockholm for work, and a question: how might we help people stay connected with family across time zones as part of their bedtime routine?",
-        media: [
-          { ...img("/work/heart-doll/participants.jpg", "Interview participants: why they moved, and from where to where"), aspect: 2436 / 795 },
-        ],
-      },
-      {
-        title: "From ideas to a doll",
-        text: "Ideation started with a worst-possible-idea workshop. Creepy puppets on your bed that wake up and nag you to call home were a bad idea, but a puppet you touch turned out to be a good one: something physical that connects you to home emotionally, rather than a globe that maps geography. After voting it down to a puppet, a globe and constellation lights, we sketched, built paper prototypes and took them to an evaluation workshop. The doll only has parts with a job: a heart that lights, and a button in each leg. No arms, so nothing to misuse. Glowing eyes were dropped after feedback that they felt scary.",
-        media: [{ ...img("/work/heart-doll/evolution.jpg", "The first sewn doll, and Rocky"), aspect: 1245 / 555 }],
-      },
-      {
-        title: "Meet Rocky",
-        text: "We sewed the doll on a sewing machine, soldered the circuit (ESP32, buttons and LED) in the Middla lab at KTH, and fitted everything inside.",
-        media: [
-          { ...img("/work/heart-doll/rocky.jpg", "Rocky: the heart light shows availability; the heart button sets you available, the cross not available"), aspect: 2385 / 1380 },
-          { ...img("/work/heart-doll/making-of.jpg", "Sewing, soldering, and testing the app with the circuit"), aspect: 2295 / 1030 },
-        ],
-      },
-      {
-        title: "Two people, one heart",
-        text: "Each person's availability is their own until they change it, and the heart shows both.",
-        items: [
-          "The doll person presses Heart: slow red breathing while they wait.",
-          "The phone person taps their photo: a lub-dub heartbeat at 60%.",
-          "Both are there: the same heartbeat at 100%. More of the same signal, not a different one.",
-          "Cross means “not now”, not “go away”: the doll goes dark, but the other person stays available.",
-          "Every press gets a white flash, and blue only ever means no phone is connected.",
-        ],
-      },
-      {
-        title: "The app",
-        text: "A glass heart, joined by tubes to the doll at the top and your photo at the bottom. Each person's liquid flows down their tube and fills their half, so the heart is only full when you're both there. Built in 3D with React Three Fiber, with a liquid surface that stays level as the phone tilts.",
-        media: [{ ...img("/work/heart-doll/app-states.jpg", "Quiet for now, You're here, They're here for you, Together"), aspect: 2355 / 1095 }],
-      },
-      {
-        title: "How it works",
-        text: "An ESP32 inside the doll drives an RGB LED and reads the two buttons. It makes its own WiFi network: scan the QR sticker, and the app, compressed into the firmware, opens by itself like hotel WiFi. The rules are one function, nextState(), that never touches the LED or the network, and the doll is the single source of truth, so the light and the app can't disagree. Every light pattern is a function of time, so a heartbeat never blocks a button press.",
-        flow: ["Heart + Cross buttons", "ESP32", "RGB heart", "WiFi + WebSocket", "3D phone app"],
-        media: [{ ...img(`${GITHUB}DM2601/main/prototype/hardware/wiring.svg`, "Wiring: ESP32, RGB LED and two buttons"), aspect: 820 / 540 }],
-      },
-    ],
-    stack: ["ESP32", "Arduino", "ESP Async WebServer", "React", "React Three Fiber", "Vite"],
-    outcome: "A working prototype in a sewn doll, a 3D phone app with a simulated doll for demos, and a web customiser to dress the doll. Next on the roadmap: a heartbeat you can feel, sound and a recorded goodnight, and a cloud relay so it works between countries.",
+    status: "Course project · 6 weeks · HT26",
+    stack: ["ESP32", "Arduino", "ESP Async WebServer", "WebSockets", "React", "React Three Fiber", "Vite", "GitHub Pages"],
     links: [
       { label: "App demo", href: "https://rkdotxyz.github.io/DM2601/app/" },
       { label: "Customiser", href: "https://rkdotxyz.github.io/DM2601/website/" },
       { label: "Research deck", href: "https://rkdotxyz.github.io/DM2601/presentation/" },
       { label: "Code", href: "https://github.com/rkdotxyz/DM2601" },
+    ],
+    body: [
+      {
+        kind: "stats",
+        items: [
+          { value: "9", label: "interviews" },
+          { value: "12", label: "papers reviewed" },
+          { value: "5", label: "heart states" },
+          { value: "6", label: "weeks, team of 4" },
+        ],
+      },
+
+      { kind: "heading", text: "The brief" },
+      {
+        kind: "text",
+        text: "The course theme was rituals: not habits or routines, but things done consciously, that carry meaning and feel wrong when skipped. We narrowed it to the pre-sleep rituals of people who have moved abroad for work or study, a group we could actually reach, and reframed the question from trouble sleeping to what helps someone wind down well.",
+      },
+
+      { kind: "heading", text: "Research" },
+      {
+        kind: "text",
+        text: "We ran nine semi-structured interviews of 20 to 30 minutes with people who had moved abroad, five to study and four to work, covering their pre-sleep routine, what changed when they moved, and what they wished were different.",
+      },
+      { kind: "media", media: { ...img("/work/heart-doll/participants.jpg", "Interview participants: why they moved, and from where to where"), aspect: 2436 / 795 } },
+      {
+        kind: "text",
+        text: "A literature review of twelve papers, mapped against existing sleep technology, showed one pattern: most tools treat sleep as something to track and optimise. We wanted the ritual before sleep instead, with ambient, screen-free modalities.",
+      },
+      { kind: "media", media: { ...img("/work/heart-doll/wb-literature-map.jpg", "Literature review: a map of sleep technologies"), aspect: 772 / 543 } },
+      {
+        kind: "text",
+        text: "Affinity mapping clustered the interviews into eight themes. Filtering out purely functional habits left three that carried emotion: talking to people back home, winding down with a show, and heavy phone use that almost everyone felt guilty about.",
+      },
+
+      { kind: "heading", text: "The insight" },
+      {
+        kind: "text",
+        text: "Our persona, Marie, 24, moved from Seoul to Stockholm for work. Talking her day through with her parents helps her settle, but Seoul is seven hours ahead: when she's ready to talk, they're asleep, and when they're free, she's busy. She types a long message instead, then scrolls in case they reply, and falls asleep without the conversation she needed.",
+      },
+      { kind: "media", media: { ...img("/work/heart-doll/wb-persona.jpg", "Persona: Marie, 24, from Seoul, working in Stockholm"), aspect: 772 / 546 } },
+      { kind: "quote", text: "How might we make it effortless to know when loved ones in different parts of the world are free to talk?" },
+
+      { kind: "heading", text: "Ideation" },
+      {
+        kind: "text",
+        text: "We started with a worst-possible-idea workshop. Creepy puppets on your bed that wake up and nag you to call home were a bad idea, but a puppet you touch stuck with us: something physical that connects you to home emotionally, rather than a globe that maps geography. Voting narrowed nine ideas to three (a puppet, a globe and constellation lights), and sketching and a moodboard to the puppet.",
+      },
+      {
+        kind: "pair",
+        media: [
+          { ...img("/work/heart-doll/wb-worst-idea.jpg", "Worst possible idea workshop"), aspect: 772 / 539 },
+          { ...img("/work/heart-doll/wb-voting.jpg", "Voting down to three ideas"), aspect: 772 / 544 },
+        ],
+        caption: "The worst-possible-idea workshop, and voting from nine ideas to three",
+      },
+
+      { kind: "heading", text: "Designing the doll" },
+      {
+        kind: "text",
+        text: "Every part has a job. The heart is the light, and each foot is a button: heart for available, cross for not now. There are no arms, so there's nothing to misuse. Glowing eyes were dropped after feedback at the evaluation workshop that they felt scary; the goal was friendly and comforting.",
+      },
+      { kind: "media", media: { ...img("/work/heart-doll/wb-design-puppet.jpg", "From first sketch and paper prototype to the sewn doll"), aspect: 772 / 546 } },
+      { kind: "media", media: { ...img("/work/heart-doll/rocky.jpg", "Rocky: the heart light shows availability; the heart button sets you available, the cross not available"), aspect: 2385 / 1380 }, caption: "Meet Rocky. It doesn't replace a phone or a messaging app; it makes availability tangible." },
+
+      { kind: "heading", text: "Two people, one heart" },
+      {
+        kind: "text",
+        text: "One person has the doll by their bed; the other, far away, has a phone. Each person's availability is their own until they change it, and the heart shows both:",
+      },
+      {
+        kind: "list",
+        items: [
+          "The doll person presses Heart: slow red breathing while they wait.",
+          "The phone person taps their photo: a lub-dub heartbeat at 60%.",
+          "Both are there: the same heartbeat at 100%. More of the same signal, not a different one.",
+          "Cross means “not now”, not “go away”: the doll goes dark, but the other person stays available, and asking again clears it.",
+          "Every press gets a white flash, and blue only ever means no phone is connected.",
+        ],
+      },
+      { kind: "media", media: { ...img("/work/heart-doll/wb-scenario-phone.jpg", "Scenario: the person with the phone reaches out first"), aspect: 773 / 546 } },
+
+      { kind: "heading", text: "The app" },
+      {
+        kind: "text",
+        text: "The phone app is drawn from my own sketch: the doll at the top, your photo in a locket at the bottom, and a glass heart between them, joined by tubes. Each person's liquid flows down their tube and fills their half, so the heart is only ever full when you're both there. It fills from the bottom for you and drips in from the top for them, so the picture also says who arrived.",
+      },
+      { kind: "media", media: { ...img("/work/heart-doll/app-3d-states.jpg", "Quiet for now, You're here, They're here for you, Together"), aspect: 1704 / 704 }, caption: "Quiet for now, You're here, They're here for you, Together" },
+      {
+        kind: "text",
+        text: "The first version was flat; it worked, but didn't feel like something you'd keep by the bed. I rebuilt it in 3D with React Three Fiber, with one rule shaping the details: liquid always travels down a person's tube before it fills the heart, and drains back the same way, so the picture never shows something impossible. The liquid's surface stays level as the phone tilts.",
+      },
+
+      { kind: "heading", text: "Electronics and firmware" },
+      {
+        kind: "text",
+        text: "An ESP32 inside the doll drives an RGB LED through three resistors and reads the two buttons. I tested every part on its own first, with four small sketches for colours, light patterns, buttons and WiFi, so the real firmware could be about behaviour only.",
+      },
+      {
+        kind: "pair",
+        media: [
+          { ...img("/work/heart-doll/wb-electronics.jpg", "ESP32 as the brain, the LED as the heart, two buttons"), aspect: 773 / 546 },
+          { ...img(`${GITHUB}DM2601/main/prototype/hardware/wiring.svg`, "Wiring: ESP32, RGB LED and two buttons"), aspect: 820 / 540 },
+        ],
+        caption: "The circuit: an ESP32, an RGB heart and two buttons",
+      },
+      {
+        kind: "list",
+        items: [
+          "The doll is the single source of truth. The rules are one function that never touches the LED or the network, so the light and the app can never disagree.",
+          "It makes its own WiFi: scan the QR sticker and the app opens by itself, like hotel WiFi. The 3D app is compiled into the firmware, about 490 KB.",
+          "One phone at a time, because there's one person on the other side of the heart. A phone that walks away is dropped after a minute.",
+          "Every light pattern is a function of time, so a heartbeat never blocks a button press. The heartbeat is two bell-shaped bumps, lub and dub.",
+        ],
+      },
+
+      { kind: "heading", text: "Making it" },
+      {
+        kind: "text",
+        text: "My teammates sewed the doll on a sewing machine; I soldered the circuit in the Middla lab at KTH, and we fitted everything inside and tested it against the app.",
+      },
+      { kind: "media", media: { ...img("/work/heart-doll/making-of.jpg", "Sewing, soldering, and testing the app with the circuit"), aspect: 2295 / 1030 }, caption: "Sewing, soldering, and testing the app with the circuit" },
+
+      { kind: "heading", text: "Problems solved" },
+      {
+        kind: "list",
+        items: [
+          "The heart glowed green. This LED's red and green legs were swapped from the usual order, so the pins are swapped in config instead of rewiring, with a red, green, blue check at every start-up to prove it.",
+          "Cross used to end everything, so the doll person's “not right now” switched the other person off too. The rules were rewritten so each person's availability is their own.",
+          "The university network was out of reach for an ESP32, so the doll stopped joining networks and started making one.",
+          "A phone that switched WiFi off didn't always close its connection. The doll now pings quiet phones and lets go of ones that stop answering.",
+        ],
+      },
+
+      { kind: "heading", text: "Make it yours" },
+      {
+        kind: "text",
+        text: "A web customiser lets you dress the doll in 3D: fabric colours, hats, glasses, extras, stickers that follow the body's curve, drawing straight onto it, and eight little rooms to place it in. The heart glows with the same light as the real doll.",
+      },
+      { kind: "media", media: { ...img("/work/heart-doll/customiser.jpg", "The Heart Doll customiser"), aspect: 1280 / 800 } },
+
+      { kind: "heading", text: "At the final crit" },
+      {
+        kind: "list",
+        items: [
+          "People liked that availability became something you can see and touch, instead of another app.",
+          "The glass heart filling in the app landed especially well.",
+          "The first question was distance: how it would work between actual countries, which is exactly what the next version is for.",
+        ],
+      },
+
+      { kind: "heading", text: "Next" },
+      {
+        kind: "text",
+        text: "A cloud relay so the phone works from anywhere, a heartbeat you can feel through a haptic motor, sound and a recorded goodnight, and moving the electronics fully into a soft, battery-powered doll.",
+      },
     ],
   },
 };
