@@ -483,6 +483,7 @@ export const caseStudies: Record<string, CaseStudy> = {
   // From the repo (github.com/rkdotxyz/DM2601) and the group's Figma workbook.
   "heart-doll": {
     summary: "A doll whose heart glows when someone far away is there for you.",
+    hero: { type: "video", src: "/work/heart-doll/hero.mp4", poster: "/work/heart-doll/glowing-heart.jpg", alt: "Rocky's heart pulsing on a desk" },
     team: "KTH DM2601, group 11: Ellen Bäck, Max Kjellgren, Rama Krushna Behera, Roxanne Kick",
     status: "Course project · HT26",
     what: "Rocky, a soft doll by the bed for people who have moved abroad. It isn't designed to replace a phone or a messaging app. It makes availability tangible: its heart glows when someone far away is free, and a button in each foot answers back, heart for available and cross for not now. A quiet sense of presence across distance.",

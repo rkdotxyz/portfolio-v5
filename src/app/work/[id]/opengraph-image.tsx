@@ -13,12 +13,13 @@ export function generateStaticParams() {
   return work.filter((w) => w.category === "key-project" && caseStudies[w.id]).map((w) => ({ id: w.id }));
 }
 
-// The best still for a project: a video's poster, its card image, a photo
+// The best still for a project: a video's poster, its card's poster or image, a photo
 // from its gallery, or the first image in its write-up.
 function stillFor(id: string) {
   const item = work.find((w) => w.id === id);
   const study = caseStudies[id];
   if (study?.hero?.poster) return study.hero.poster;
+  if (item?.media?.poster) return item.media.poster;
   if (item?.media?.type === "image") return item.media.src;
   const photo = study?.gallery?.find((m) => m.type === "image" && !m.src.endsWith(".svg"));
   if (photo) return photo.src;

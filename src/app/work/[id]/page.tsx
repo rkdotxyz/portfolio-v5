@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
@@ -84,14 +85,14 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
 
       <article className="px-4 pb-24 pt-14 sm:px-6 sm:pt-20">
         {/* Title */}
-        <header className="max-w-4xl">
+        <header className="mx-auto max-w-4xl text-center">
           <h1 className="text-4xl font-medium tracking-tight sm:text-6xl">{study.title ?? item.title}</h1>
           {study.subtitle ? (
-            <p className="mt-4 max-w-3xl font-mono text-xs uppercase leading-relaxed tracking-wider text-muted sm:text-sm">
+            <p className="mx-auto mt-4 max-w-3xl font-mono text-xs uppercase leading-relaxed tracking-wider text-muted sm:text-sm">
               {study.subtitle}
             </p>
           ) : (
-            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">{study.summary}</p>
+            <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">{study.summary}</p>
           )}
         </header>
 
@@ -210,9 +211,13 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
                   key={m.src}
                   className={study.gallery!.length % 2 === 1 && study.gallery!.length !== 3 && i === 0 ? "md:col-span-2" : ""}
                 >
-                  <div className="relative overflow-hidden bg-surface" style={{ aspectRatio: m.aspect ?? 16 / 10 }}>
-                    <WorkMedia item={{ ...item, media: m }} sizes="(min-width: 768px) 50vw, 100vw" fit="contain" />
-                  </div>
+                  {m.type === "image" ? (
+                    <NaturalImage media={m} sizes="(min-width: 768px) 50vw, 100vw" />
+                  ) : (
+                    <div className="relative overflow-hidden bg-surface" style={{ aspectRatio: m.aspect ?? 16 / 10 }}>
+                      <WorkMedia item={{ ...item, media: m }} sizes="(min-width: 768px) 50vw, 100vw" fit="contain" />
+                    </div>
+                  )}
                   {m.alt && <figcaption className="mt-2 text-sm text-muted">{m.alt}</figcaption>}
                 </figure>
               ))}
@@ -240,11 +245,15 @@ async function CaseStudy({ params }: { params: PageProps<"/work/[id]">["params"]
   );
 }
 
+// Section headings: large and set off by a rule, so a heading right after an
+// image reads as the start of a new section, not as the image's caption.
+const SECTION_HEADING = "mb-5 mt-16 border-t border-line pt-8 text-2xl font-medium tracking-tight sm:text-3xl";
+
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="mb-12 last:mb-0">
-      <h2 className="font-mono text-[11px] uppercase tracking-wider text-muted">{title}</h2>
-      <div className="mt-3 text-lg leading-relaxed">{children}</div>
+    <section className="[&:first-child>h2]:mt-0 [&:first-child>h2]:border-t-0 [&:first-child>h2]:pt-0">
+      <h2 className={SECTION_HEADING}>{title}</h2>
+      <div className="text-lg leading-relaxed">{children}</div>
     </section>
   );
 }
@@ -276,7 +285,7 @@ function Body({ blocks, item }: { blocks: BodyBlock[]; item: WorkItem }) {
         switch (b.kind) {
           case "heading":
             return (
-              <h2 key={i} className="mb-3 mt-12 font-mono text-[11px] uppercase tracking-wider text-muted first:mt-0">
+              <h2 key={i} className={`${SECTION_HEADING} first:mt-0 first:border-t-0 first:pt-0`}>
                 {b.text}
               </h2>
             );
@@ -319,12 +328,32 @@ function BodyMedia({ media, item, caption = false }: { media: Media; item: WorkI
   const aspect = media.type === "youtube" ? 16 / 9 : (media.aspect ?? 16 / 9);
   return (
     <figure className="my-8 last:mb-0">
-      <div className="relative overflow-hidden bg-surface" style={{ aspectRatio: aspect }}>
-        <WorkMedia item={{ ...item, media }} sizes="(min-width: 768px) 768px, 100vw" fit="contain" />
-      </div>
+      {media.type === "image" ? (
+        <NaturalImage media={media} sizes="(min-width: 768px) 768px, 100vw" />
+      ) : (
+        <div className="relative overflow-hidden bg-surface" style={{ aspectRatio: aspect }}>
+          <WorkMedia item={{ ...item, media }} sizes="(min-width: 768px) 768px, 100vw" fit="contain" />
+        </div>
+      )}
       {media.alt && media.type !== "youtube" && (
         <figcaption className={caption ? "mt-2 text-sm text-muted" : "sr-only"}>{media.alt}</figcaption>
       )}
     </figure>
+  );
+}
+
+// An image at its own proportions: full width, height following the file,
+// so there's never a letterbox around it.
+function NaturalImage({ media, sizes }: { media: Media; sizes: string }) {
+  return (
+    <Image
+      src={media.src}
+      alt={media.alt ?? ""}
+      width={0}
+      height={0}
+      sizes={sizes}
+      unoptimized={/\.(gif|svg)$/i.test(media.src)}
+      className="h-auto w-full"
+    />
   );
 }

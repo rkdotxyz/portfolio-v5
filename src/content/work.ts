@@ -133,7 +133,11 @@ export const work: WorkItem[] = [
     title: "Blade Design System",
     year: "2022–26",
     tags: ["design system", "figma plugins", "ai agents"],
-    media: img(`${FRAMER}TlacyP4UHkDd8DiBZNtzn9YEeM.png`, "Blade components and product screens"),
+    // A loop from the Blade launch video; the still stands in for share cards.
+    media: {
+      ...vid("/work/blade/cover.mp4", "Blade components, then its variable library, from the launch video"),
+      poster: `${FRAMER}TlacyP4UHkDd8DiBZNtzn9YEeM.png`,
+    },
     x: -KEY - 24,
     y: 20,
     w: KEY,
@@ -144,7 +148,10 @@ export const work: WorkItem[] = [
     title: "Heart Doll",
     year: "2026",
     tags: ["soft robotics", "electronics", "tangible"],
-    media: img("/work/heart-doll/glowing-heart.jpg", "Rocky, the Heart Doll, with its heart glowing red"),
+    media: {
+      ...vid("/work/heart-doll/cover.mp4", "Rocky, the Heart Doll, with its heart pulsing red"),
+      poster: "/work/heart-doll/glowing-heart.jpg",
+    },
     x: 24,
     y: 20,
     w: KEY,
