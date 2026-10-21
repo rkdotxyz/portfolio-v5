@@ -18,7 +18,10 @@ export type BodyBlock =
   | { kind: "text"; text: string } // line breaks are kept
   | { kind: "quote"; text: string }
   | { kind: "list"; items: string[] }
-  | { kind: "media"; media: Media };
+  | { kind: "media"; media: Media; caption?: string } // caption shows under it
+  | { kind: "pair"; media: [Media, Media]; caption?: string } // two side by side
+  | { kind: "stats"; items: { value: string; label: string }[] } // a row of headline numbers
+  | { kind: "steps"; items: string[] }; // a flow drawn as connected boxes
 
 // A titled part of the story beyond what / why / how: text, a list, a flow
 // and images, in that order.
@@ -53,60 +56,175 @@ export type CaseStudy = {
 export const caseStudies: Record<string, CaseStudy> = {
   /* ── Key projects ─────────────────────────────────────────────── */
 
-  // From the repo: github.com/rkdotxyz/esp32-led-snake (README and docs/).
+  // Written from the repo (github.com/rkdotxyz/esp32-led-snake: README,
+  // docs/story, architecture, protocol, build log and gotchas), the build
+  // video, and RK's answers on why, how AI was used and playtesting.
   "esp32-led-snake": {
     summary: "Snake on a 32×8 LED matrix, played from any phone over the ESP32's own WiFi.",
-    role: "Solo: hardware, firmware, controller and docs",
+    title: "ESP32 LED Snake",
+    subtitle: "Rebuilding a game everyone knows as a physical object, played from your phone",
     hero: { type: "video", src: "/work/esp32-led-snake/full.mp4", poster: "/work/esp32-led-snake/poster.jpg", controls: true, alt: "ESP32 LED Snake: from the Nokia original to the LED matrix" },
+    role: "Solo: concept, electronics, firmware, controller app",
     status: "v2.1 · open source",
-    what: "A pocket arcade: Snake on a 256-LED matrix, played from a phone browser. Join the ESP32's own WiFi, open snake.local, and the phone becomes the controller. No app, no router, one USB cable.",
-    why: "A first version worked, but it never felt finished, and I couldn't have explained half of why it worked. Starting an MSc in Interactive Media Technology at KTH, coming from design and frontend engineering, I rebuilt it from scratch with one goal: understand every part, and leave a repo someone else could rebuild from.",
-    how: "Ten phases, each adding one thing and ending with something visible on the matrix, each tagged in git. Hardware came first, with tiny test sketches: light one pixel, walk a dot through all 256 LEDs, map the matrix's serpentine wiring, stress-test the power. Then the game. The ESP32 runs its own WiFi access point, serves the controller page from flash, and keeps a WebSocket open to every phone: presses go in, score and game events come back. The rules module knows only a grid, a snake and a direction, so the controller, effects, colours and speed-up were all added later without touching it.",
-    flow: ["Phone browser", "WiFi + WebSocket", "ESP32", "8×32 LED matrix"],
-    sections: [
-      {
-        title: "The phone is the controller",
-        text: "Instead of buttons, the ESP32 hosts its own WiFi network and serves the controller: a d-pad, swipes, pause, restart and settings. There's no app to install and no router, so it works anywhere, including on university networks an ESP32 can't easily join. Between games, the snake and food colours can be picked from presets or any colour, previewed live on the matrix.",
-        media: [
-          { type: "video", src: "/work/esp32-led-snake/controller.mp4", alt: "Steering from the phone's d-pad" },
-          { type: "video", src: "/work/esp32-led-snake/colours.mp4", alt: "Picking the snake's colour on the phone" },
-        ],
-      },
-      {
-        title: "Designed around a power budget",
-        text: "One USB cable gives the whole board roughly 500 mA; the matrix could draw 15 A fully lit. A firmware cap dims any frame that would draw more than 300 mA, and the look follows from it: a few bright pixels on a dark board, never a lit screen. The constraint shaped the design, not just the wiring.",
-      },
-      {
-        title: "Designing the details",
-        text: "Several changes only became obvious on the real matrix.",
-        items: [
-          "The attract screen first lit every LED faintly behind the demo snake. Just the snake and apples on a dark board looked much cleaner.",
-          "The score uses a custom 5×6 font, centred with the top and bottom rows free, and counts up with leading zeros (00, 01 … 12) so the number stays steady.",
-          "A navy snake nearly disappeared, so colours are normalised to full strength, with brightness set in one place.",
-          "Effects looked choppy when the matrix only redrew as the snake moved. Drawing now runs on its own 30 ms clock, separate from movement.",
-          "Switching walls and wrap-around mid-game felt wrong, so settings only open between games.",
-          "The phone never assumes a setting changed: a swatch only lights up once the ESP32 confirms it, so two phones can't disagree.",
-        ],
-        media: [{ type: "video", src: "/work/esp32-led-snake/score.mp4", alt: "The crash, then the score counting up" }],
-      },
-      {
-        title: "Problems solved",
-        items: [
-          "The code ran, but nothing lit up. The breadboard's power rails were split in the middle, with the ESP32 and the matrix on different halves. When the code says it works and the hardware disagrees, suspect power first.",
-          "The web server runs in its own background task, so a phone can add a direction while the game loop takes one out. The shared queue is guarded by a critical section.",
-          "A module called network.h collided with the ESP32 core's Network.h, since macOS treats the two names as the same file. It became web_control.",
-          "Still open: Safari has no vibration API, so on an iPhone, sound carries the feedback.",
-        ],
-        media: [{ type: "video", src: "/work/esp32-led-snake/wiring.mp4", alt: "The ESP32 on the breadboard, wired to the matrix" }],
-      },
-    ],
-    stack: ["ESP32", "WS2812B matrix", "C++ / Arduino", "FastLED", "ESP Async WebServer", "WebSockets", "Web Audio"],
-    outcome: "v2.1: attract screen, crash animation and score, walls or wrap-around, custom snake and food colours, a pulsing head, fading tail and eat sparkle, phone sounds, a snake that speeds up as it grows, and settings that survive power-off. Documented as a ten-phase build guide, with the architecture, protocol and build log. Next: a saved high score, a 3D-printed diffuser, and two-player Snake.",
+    stack: ["ESP32", "WS2812B matrix", "C++ / Arduino", "FastLED", "ESP Async WebServer", "WebSockets", "HTML / JS", "Web Audio"],
     links: [
       { label: "Code", href: "https://github.com/rkdotxyz/esp32-led-snake" },
       { label: "Build guide", href: "https://github.com/rkdotxyz/esp32-led-snake/tree/main/docs/guide" },
     ],
-    gallery: [{ ...img(`${GITHUB}esp32-led-snake/main/hardware/wiring.svg`, "Wiring: ESP32, WS2812B matrix, capacitor and data resistor"), aspect: 820 / 420 }],
+    body: [
+      {
+        kind: "stats",
+        items: [
+          { value: "256", label: "LEDs on one USB cable" },
+          { value: "0", label: "apps to install" },
+          { value: "10", label: "build phases, each tagged" },
+          { value: "1", label: "weekend" },
+        ],
+      },
+
+      { kind: "heading", text: "Why" },
+      {
+        kind: "text",
+        text: "I came to an MSc in tangible interfaces from product design and frontend engineering. Screens and code were familiar; wires, power supplies and microcontrollers were not. I wanted a hands-on way in, and Snake was the perfect excuse: a game everyone already knows from their Nokia, so all the attention can go to the new form it takes.",
+      },
+      {
+        kind: "text",
+        text: "A first version worked, but I couldn't have explained half of why. So I rebuilt it from scratch with two goals: understand every part, and leave a repo someone else could rebuild from.",
+      },
+      { kind: "quote", text: "Old game, new form factor. A weekend of wiring, code and debugging, and Snake lives again on an LED matrix." },
+
+      { kind: "heading", text: "The problem" },
+      { kind: "text", text: "Putting Snake on a strip of LEDs sounds simple. Three constraints made it a design problem:" },
+      {
+        kind: "list",
+        items: [
+          "Control: no buttons, no app, no router. It had to work anywhere, including on university networks an ESP32 can't join.",
+          "Power: 256 LEDs could draw around 15 A fully lit. One USB cable gives the whole board about 0.5 A.",
+          "Feel: a game lives or dies on responsiveness. Two quick turns can't be lost, and animations can't stutter on a microcontroller.",
+        ],
+      },
+
+      { kind: "heading", text: "How it works" },
+      {
+        kind: "text",
+        text: "The ESP32 makes its own WiFi network and serves the controller page itself. Join ESP32-Snake, open snake.local, and your phone becomes the controller. A WebSocket stays open in both directions: turns go in, score, state and game events come back.",
+      },
+      { kind: "steps", items: ["Phone browser", "Own WiFi + WebSocket", "ESP32", "8×32 LED matrix"] },
+      { kind: "media", media: { ...img("/work/esp32-led-snake/system.svg", "System diagram: phone, ESP32 modules and the matrix"), aspect: 1200 / 520 } },
+      {
+        kind: "text",
+        text: "Inside, each module has one job. The rules know only a grid, a snake and a direction: no LEDs, no WiFi. A state machine moves between attract, play, pause, game over and score, and the display is the only code that touches the LEDs. Because the rules stayed separate, the phone controller, effects, colours and speed-up were all added later without touching the game itself.",
+      },
+
+      { kind: "heading", text: "Electronics" },
+      {
+        kind: "text",
+        text: "An ESP32 DevKit drives a flexible WS2812B 8×32 matrix, bent into a curve on the desk. A 330 Ω resistor protects the data line and a 100 µF capacitor smooths the supply. Everything runs from one USB cable.",
+      },
+      { kind: "media", media: { ...img("/work/esp32-led-snake/wiring.svg", "Wiring: ESP32, WS2812B matrix, capacitor and data resistor"), aspect: 820 / 420 } },
+      { kind: "subheading", text: "Designed around a power budget" },
+      {
+        kind: "text",
+        text: "A firmware cap dims any frame that would draw more than 300 mA, and I tested it with every LED lit white before writing the game. The constraint shaped the look as much as the wiring: a few bright pixels on a dark board, never a lit screen.",
+      },
+      { kind: "subheading", text: "Mapping the grid" },
+      {
+        kind: "text",
+        text: "The matrix is one long strip wired in a zigzag, down one column and up the next. A small function turns a column and row into the LED's number on the strip, checked by lighting the corners, diagonals and hand-typed positions against predictions.",
+      },
+      { kind: "media", media: { type: "video", src: "/work/esp32-led-snake/wiring.mp4", alt: "The ESP32 on the breadboard, wired to the matrix" }, caption: "The bring-up rig: ESP32, breadboard and the curved matrix" },
+
+      { kind: "heading", text: "The controller app" },
+      {
+        kind: "text",
+        text: "The controller is a single page served from the ESP32's flash. It had to be usable with a thumb in a dark room while your eyes are on the matrix, not the phone.",
+      },
+      { kind: "media", media: { ...img("/work/esp32-led-snake/app-screens.jpg", "The controller: ready, playing, game over and settings"), aspect: 1724 / 924 }, caption: "Ready, playing, game over and settings" },
+      {
+        kind: "list",
+        items: [
+          "Big d-pad, swipe anywhere (several turns in one drag), and arrow keys or W A S D on a laptop.",
+          "The status line tells you what to do next: press any direction to start, paused, or why the game ended.",
+          "Settings only open between games, enforced on the ESP32 too, because changing the rules mid-play felt wrong.",
+          "The phone never assumes a setting changed: a swatch only lights up once the ESP32 confirms it, so two phones can't disagree.",
+          "Sound is synthesised in the browser for start, eat and crash, and follows the phone's silent switch.",
+        ],
+      },
+      {
+        kind: "pair",
+        media: [
+          { type: "video", src: "/work/esp32-led-snake/controller.mp4", alt: "Steering from the phone's d-pad" },
+          { type: "video", src: "/work/esp32-led-snake/colours.mp4", alt: "Picking the snake's colour on the phone" },
+        ],
+        caption: "Steering from the phone, and picking a colour that previews live on the matrix",
+      },
+
+      { kind: "heading", text: "On the matrix" },
+      {
+        kind: "text",
+        text: "Several details only became obvious on the real LEDs, so most screens went through a round of changes after testing:",
+      },
+      {
+        kind: "list",
+        items: [
+          "Attract screen: a demo snake zigzags across all 256 squares eating apples. A dim background glow came out; just the snake on a dark board looked cleaner.",
+          "Crash: the snake flashes and crumbles from the tail, then the score counts up in a custom 5×6 font, centred, with leading zeros so the number holds still.",
+          "Colours: a navy snake nearly disappeared, so every colour is normalised to full strength, with brightness set in one place.",
+          "Effects: a pulsing head, a fading tail, glowing food and a sparkle on each bite. They looked choppy when the matrix only redrew as the snake moved, so drawing got its own 30 ms clock.",
+          "Speed: the snake speeds up with each bite, from 250 ms a step down to 120 ms.",
+        ],
+      },
+      { kind: "media", media: { type: "video", src: "/work/esp32-led-snake/score.mp4", alt: "The crash, then the score counting up" }, caption: "Crash, crumble, and the score counting up" },
+
+      { kind: "heading", text: "Problems solved" },
+      {
+        kind: "list",
+        items: [
+          "The code ran, but nothing lit up. The breadboard's power rails were split in the middle, with the ESP32 and the matrix on different halves. Lesson: when the code says it works and the hardware disagrees, suspect power first.",
+          "Two tasks, one queue. The web server runs in its own task, so a phone can add a turn while the game takes one out. The shared queue is guarded by a critical section.",
+          "Late joiners heard old sounds. One-off events (start, eat, crash) are now sent separately from status, which is resent to every new phone.",
+          "A file called network.h collided with the ESP32 core's Network.h, since macOS treats the names as the same file. It became web_control.",
+          "Still open: iPhone Safari has no vibration API, and the known workaround didn't fire, so sound carries the feedback on iPhone.",
+        ],
+      },
+
+      { kind: "heading", text: "Playtesting" },
+      {
+        kind: "text",
+        text: "Friends and classmates played it, and loved it. A few things kept happening:",
+      },
+      {
+        kind: "list",
+        items: [
+          "People got competitive fast, playing again and again to beat each other's scores.",
+          "The surprise was the phone: scan, join, and it's a controller, with no app to install.",
+          "It brought back memories of playing Snake on a Nokia.",
+          "More than one person asked for two-player, which is now next on the list.",
+        ],
+      },
+
+      { kind: "heading", text: "How it was built" },
+      {
+        kind: "text",
+        text: "Ten phases, each adding one thing and ending with something visible on the matrix, each tagged in git, from blinking the onboard LED to sound and speed-up. Hardware came first, with tiny single-purpose test sketches. I used Claude as a tutor along the way, to understand concepts like power budgets, WebSockets and state machines, while I wired, wrote, tested and made the decisions. The repo doubles as a step-by-step guide, with the architecture, protocol, build log and gotchas.",
+      },
+
+      { kind: "heading", text: "What I learned" },
+      {
+        kind: "list",
+        items: [
+          "Hardware: power budgets decide more than wiring. A brownout means current, flicker usually means ground or data, total darkness usually means power never arrived.",
+          "Software: state machines instead of flags, millis() instead of delay(), separate clocks for moving and drawing, and what happens when two tasks share data.",
+          "Process: small steps with a visible check and a tag made every step safe to try, and writing the log while things were fresh made the documentation possible.",
+        ],
+      },
+
+      { kind: "heading", text: "Next" },
+      {
+        kind: "text",
+        text: "Two-player Snake with two phones, a saved high score, and a 3D-printed diffuser so each LED reads as a crisp square pixel. And the one that got away: making an iPhone buzz when the snake crashes.",
+      },
+    ],
   },
 
   // Carried over 1:1 from the v4 case study (ramakrushna.xyz/selected-work/planet-under-pressure).

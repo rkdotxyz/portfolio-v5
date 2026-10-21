@@ -316,18 +316,57 @@ function Body({ blocks, item }: { blocks: BodyBlock[]; item: WorkItem }) {
               </ul>
             );
           case "media":
-            return <BodyMedia key={i} media={b.media} item={item} />;
+            return <BodyMedia key={i} media={b.media} item={item} caption={b.caption} />;
+          case "pair":
+            return (
+              <figure key={i} className="my-8">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {b.media.map((m) => (
+                    <BodyMedia key={m.src} media={m} item={item} bare />
+                  ))}
+                </div>
+                {b.caption && <figcaption className="mt-2 text-sm text-muted">{b.caption}</figcaption>}
+              </figure>
+            );
+          case "stats":
+            return (
+              <dl key={i} className="mb-14 grid grid-cols-2 border-l border-t border-line sm:grid-cols-4">
+                {b.items.map((st) => (
+                  <div key={st.label} className="flex flex-col-reverse justify-end border-b border-r border-line p-4">
+                    <dt className="mt-1.5 font-mono text-[10px] uppercase leading-snug tracking-wider text-muted">{st.label}</dt>
+                    <dd className="text-3xl font-medium tracking-tight sm:text-4xl">{st.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            );
+          case "steps":
+            return (
+              <div key={i} className="mb-4">
+                <Flow steps={b.items} />
+              </div>
+            );
         }
       })}
     </div>
   );
 }
 
-// An image at its own proportions. `caption` shows its alt text beneath it.
-function BodyMedia({ media, item, caption = false }: { media: Media; item: WorkItem; caption?: boolean }) {
+// An image at its own proportions. `caption` is a line shown beneath it
+// (`true` shows its alt text); `bare` skips the surrounding figure.
+function BodyMedia({
+  media,
+  item,
+  caption = false,
+  bare = false,
+}: {
+  media: Media;
+  item: WorkItem;
+  caption?: boolean | string;
+  bare?: boolean;
+}) {
   const aspect = media.type === "youtube" ? 16 / 9 : (media.aspect ?? 16 / 9);
   return (
-    <figure className="my-8 last:mb-0">
+    <figure className={bare ? "" : "my-8 last:mb-0"}>
       {media.type === "image" ? (
         <NaturalImage media={media} sizes="(min-width: 768px) 768px, 100vw" />
       ) : (
@@ -335,8 +374,13 @@ function BodyMedia({ media, item, caption = false }: { media: Media; item: WorkI
           <WorkMedia item={{ ...item, media }} sizes="(min-width: 768px) 768px, 100vw" fit="contain" />
         </div>
       )}
-      {media.alt && media.type !== "youtube" && (
-        <figcaption className={caption ? "mt-2 text-sm text-muted" : "sr-only"}>{media.alt}</figcaption>
+      {typeof caption === "string" ? (
+        <figcaption className="mt-2 text-sm text-muted">{caption}</figcaption>
+      ) : (
+        media.alt &&
+        media.type !== "youtube" && (
+          <figcaption className={caption ? "mt-2 text-sm text-muted" : "sr-only"}>{media.alt}</figcaption>
+        )
       )}
     </figure>
   );

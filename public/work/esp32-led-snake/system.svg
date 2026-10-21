@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <title>ESP32 LED Snake system</title>
+  <desc>A phone browser talks to the ESP32 over the ESP32's own WiFi and a WebSocket. Inside the ESP32, an input queue feeds a state machine, which drives the game rules, the screens and the theme; the display module maps the grid onto 256 LEDs on an 8 by 32 matrix.</desc>
+  <rect width="1200" height="520" fill="#0a0a0a"/>
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#262626"/></pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f5f5f5"/></marker>
+  </defs>
+  <rect width="1200" height="520" fill="url(#dots)"/>
+
+  <!-- Phone -->
+  <g transform="translate(60,150)">
+    <rect y="-26" width="104" height="26" fill="#f5f5f5"/><text x="10" y="-8" font-size="15" fill="#0a0a0a">phone</text>
+    <rect width="200" height="220" fill="none" stroke="#f5f5f5" stroke-width="1.5"/>
+    <text x="18" y="40" font-size="17" fill="#f5f5f5">Browser</text>
+    <text x="18" y="66" font-size="13" fill="#8a8a8a">controller page</text>
+    <text x="18" y="112" font-size="13" fill="#8a8a8a">d-pad · swipes · keys</text>
+    <text x="18" y="136" font-size="13" fill="#8a8a8a">score · state</text>
+    <text x="18" y="160" font-size="13" fill="#8a8a8a">sound · settings</text>
+  </g>
+
+  <!-- Link -->
+  <g font-size="12">
+    <line x1="270" y1="225" x2="400" y2="225" stroke="#f5f5f5" stroke-width="1.5" marker-end="url(#a)"/>
+    <line x1="400" y1="285" x2="270" y2="285" stroke="#f5f5f5" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="276" y="198" fill="#f5f5f5">up · pause</text>
+    <text x="276" y="214" fill="#f5f5f5">#rrggbb</text>
+    <text x="276" y="306" fill="#f5f5f5">score · state</text>
+    <text x="276" y="322" fill="#f5f5f5">event eat</text>
+    <text x="276" y="258" fill="#8a8a8a">WiFi + WS</text>
+  </g>
+
+  <!-- ESP32 -->
+  <g transform="translate(410,70)">
+    <rect y="-26" width="96" height="26" fill="#f5f5f5"/><text x="10" y="-8" font-size="15" fill="#0a0a0a">esp32</text>
+    <rect width="470" height="380" fill="none" stroke="#f5f5f5" stroke-width="1.5"/>
+    <g font-size="14" fill="#f5f5f5">
+      <rect x="24" y="30" width="190" height="56" fill="none" stroke="#5a5a5a"/>
+      <text x="38" y="55">web_control</text><text x="38" y="75" font-size="12" fill="#8a8a8a">hotspot · page · socket</text>
+      <rect x="24" y="112" width="190" height="56" fill="none" stroke="#5a5a5a"/>
+      <text x="38" y="137">input</text><text x="38" y="157" font-size="12" fill="#8a8a8a">locked command queue</text>
+      <rect x="256" y="112" width="190" height="56" fill="none" stroke="#f5f5f5"/>
+      <text x="270" y="137">state machine</text><text x="270" y="157" font-size="12" fill="#8a8a8a">attract → play → score</text>
+      <rect x="24" y="200" width="130" height="56" fill="none" stroke="#5a5a5a"/>
+      <text x="38" y="225">snake_game</text><text x="38" y="245" font-size="12" fill="#8a8a8a">rules only</text>
+      <rect x="170" y="200" width="130" height="56" fill="none" stroke="#5a5a5a"/>
+      <text x="184" y="225">screens</text><text x="184" y="245" font-size="12" fill="#8a8a8a">attract · crash</text>
+      <rect x="316" y="200" width="130" height="56" fill="none" stroke="#5a5a5a"/>
+      <text x="330" y="225">theme</text><text x="330" y="245" font-size="12" fill="#8a8a8a">colour · effects</text>
+      <rect x="24" y="290" width="422" height="56" fill="none" stroke="#5a5a5a"/>
+      <text x="38" y="315">display</text><text x="38" y="335" font-size="12" fill="#8a8a8a">x,y → LED · 300 mA power cap · 30 ms frames</text>
+      <text x="270" y="60" font-size="12" fill="#8a8a8a">settings → flash</text>
+    </g>
+    <g stroke="#8a8a8a" stroke-width="1.2" fill="none" marker-end="url(#a)">
+      <line x1="119" y1="86" x2="119" y2="108"/>
+      <line x1="214" y1="140" x2="252" y2="140"/>
+      <line x1="351" y1="168" x2="89" y2="196"/>
+      <line x1="351" y1="168" x2="235" y2="196"/>
+      <line x1="351" y1="168" x2="381" y2="196"/>
+      <line x1="235" y1="256" x2="235" y2="286"/>
+    </g>
+  </g>
+
+  <!-- Matrix -->
+  <line x1="880" y1="390" x2="940" y2="390" stroke="#f5f5f5" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="884" y="378" font-size="13" fill="#8a8a8a">GPIO2</text>
+  <g transform="translate(950,300)">
+    <rect y="-26" width="150" height="26" fill="#f5f5f5"/><text x="10" y="-8" font-size="15" fill="#0a0a0a">8×32 matrix</text>
+    <rect width="200" height="180" fill="none" stroke="#f5f5f5" stroke-width="1.5"/>
+    <g fill="#2a2a2a">
+      <!-- 8 rows x 16 visible columns of LEDs -->
+      <g id="row"><circle cx="16" cy="18" r="4"/><circle cx="28" cy="18" r="4"/><circle cx="40" cy="18" r="4"/><circle cx="52" cy="18" r="4"/><circle cx="64" cy="18" r="4"/><circle cx="76" cy="18" r="4"/><circle cx="88" cy="18" r="4"/><circle cx="100" cy="18" r="4"/><circle cx="112" cy="18" r="4"/><circle cx="124" cy="18" r="4"/><circle cx="136" cy="18" r="4"/><circle cx="148" cy="18" r="4"/><circle cx="160" cy="18" r="4"/><circle cx="172" cy="18" r="4"/><circle cx="184" cy="18" r="4"/></g>
+      <use href="#row" y="20"/><use href="#row" y="40"/><use href="#row" y="60"/><use href="#row" y="80"/><use href="#row" y="100"/><use href="#row" y="120"/><use href="#row" y="140"/>
+    </g>
+    <g fill="#3cff6e"><circle cx="52" cy="98" r="4"/><circle cx="64" cy="98" r="4"/><circle cx="76" cy="98" r="4"/><circle cx="88" cy="98" r="4"/><circle cx="88" cy="78" r="4"/><circle cx="88" cy="58" r="4"/><circle cx="100" cy="58" r="4"/></g>
+    <circle cx="148" cy="118" r="4" fill="#ff3a1a"/>
+    <text x="0" y="206" font-size="12" fill="#8a8a8a">256 WS2812B · USB 5 V</text>
+  </g>
+</svg>
