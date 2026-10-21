@@ -37,7 +37,7 @@ export const disciplines: Discipline[] = [
     id: "design",
     label: "Design",
     tools: [
-      { name: "Figma", uses: ["blade-design-system", "pattern-creator", "keyscout", "token-visualiser", "healthicons", "heart-doll"] },
+      { name: "Figma", uses: ["blade-design-system", "pattern-creator", "keyscout", "token-visualiser", "healthicons", "heart-doll", "ingo-mmt"] },
       { name: "Design systems", uses: ["blade-design-system", "pattern-creator", "token-visualiser", "keyscout"] },
       { name: "Framer", uses: ["stratosplash", "framer-components", "site-hero", "project-explorer"] },
       { name: "Photography", uses: ["photo-td", "stratosplash", "lenscribe", "lightscape-plants", "lightscape-steal"] },

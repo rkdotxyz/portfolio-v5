@@ -122,6 +122,7 @@ export const work: WorkItem[] = [
       type: "video",
       src: "https://framerusercontent.com/assets/yit5o8m47SUwAemEkxiWGGDKiA.mp4",
       alt: "The planet changing as data parameters move",
+      poster: "/work/planet/poster.jpg", // a still for share cards
     },
     x: 24,
     y: -300,
@@ -200,6 +201,10 @@ export const work: WorkItem[] = [
   { id: "led-matrix", category: "exploration", title: "LED Matrix", about: "An LED matrix lit up and driven from a laptop.", media: img(`${FRAMER}ddm6ikbkhswupc3CCIhiIEiTgHI.gif`, "An LED matrix lit up beside a laptop"), interest: 2 },
   { id: "lightscape-steal", category: "exploration", title: "Lightscape: Steal Like an Artist", year: "2023", about: "Genuary 2023, day 6: geometric shapes drawn in green light by the plotter, as a long exposure.", tools: ["p5.js", "Pen plotter"], media: pic(`${X}lightscape-steal-like-an-artist.jpg`, "Green triangles drawn in light", 1), interest: 1 },
   { id: "cad", category: "exploration", title: "CAD Basics", year: "2026", about: "Back to CAD basics in Fusion: a brick, a bottle and a paper clip.", tools: ["Fusion"], media: pic(`${X}cad.jpg`, "A brick modelled in Fusion", 1.6) },
+  // ingo-MMT host app (MakeMyTrip internship): snippets from the v4 case study.
+  { id: "ingo-mmt", category: "side-project", title: "ingo-MMT: How to Reach", year: "2021", about: "A flow for homestay hosts on the MakeMyTrip and Goibibo host app to add accurate directions to their property, from my internship at MakeMyTrip.", tools: ["Figma"], media: pic("/work/ingo/hero.jpg", "The How to Reach flow across several phone screens", 1000 / 454), url: "https://www.ramakrushna.xyz/selected-work/ingo-mmt-app", interest: 2 },
+  { id: "ingo-mmt-directions", category: "side-project", title: "ingo-MMT: Adding Directions", year: "2021", about: "Hosts add each leg of the route, with mode of transport, timings and intermediary stops, and the app writes the description for guests.", tools: ["Figma"], media: pic("/work/ingo/directions.jpg", "Add Directions screens with intermediary steps", 1000 / 733), url: "https://www.ramakrushna.xyz/selected-work/ingo-mmt-app" },
+  { id: "ingo-mmt-location", category: "side-project", title: "ingo-MMT: Manual Location", year: "2021", about: "Many homestays are remote, so hosts can pin a place on the map by hand when search can't find it.", tools: ["Figma"], media: pic("/work/ingo/manual-location.jpg", "Searching for and pinning an intermediary location on a map", 1000 / 615), url: "https://www.ramakrushna.xyz/selected-work/ingo-mmt-app" },
   { id: "generative-music", category: "exploration", title: "Generative Music", about: "Music generated from code.", media: img(`${FRAMER}ssF2EBws3Q9SoKkiiiNnqRDO3Zk.gif`, "Live-coded generative music") },
   { id: "scenic-seats", category: "side-project", title: "Scenic Seats", about: "Which side of the plane to sit on for the sunrise, the sunset or the view, across 198 Indian domestic routes.", media: pic(`${X}scenic-seats.jpg`, "The Scenic Seats route picker", 4 / 3), url: "https://scenic-seats.vercel.app" },
   { id: "typography", category: "exploration", title: "Typography", about: "Letterforms in motion.", media: img(`${FRAMER}PfMZ22AeOAugh6aFxtL0gmS4Xo.gif`, "Animated letterform"), interest: 2 },
