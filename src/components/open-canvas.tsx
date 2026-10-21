@@ -139,7 +139,8 @@ export function OpenCanvas() {
 
   // Key projects open their case study. Other cards with a live site open it
   // in a new tab: straight away with a mouse, or on a second tap on touch,
-  // where the first tap shows the callout. The rest toggle their callout.
+  // where the first tap shows the callout. The rest toggle their callout on
+  // touch only.
   const openProject = (id: string, pointerType = "mouse") => {
     const w = workById.get(id);
     if (w?.category === "key-project") {
@@ -148,7 +149,9 @@ export function OpenCanvas() {
     } else if (w?.url && (pointerType === "mouse" || pinnedId === id)) {
       play("open");
       window.open(w.url, "_blank", "noopener,noreferrer");
-    } else {
+    } else if (pointerType !== "mouse") {
+      // Touch has no hover, so a tap holds the callout open instead. With a
+      // mouse the callout follows hover alone, and a click does nothing.
       play("click");
       setPinnedId((p) => (p === id ? null : id));
     }
@@ -600,6 +603,6 @@ function NoteCard() {
 // what activating it does.
 function describe(w: WorkItem) {
   const action =
-    w.category === "key-project" ? "Opens the case study." : w.url ? "Opens the live site in a new tab." : "Shows its description.";
+    w.category === "key-project" ? "Opens the case study." : w.url ? "Opens the live site in a new tab." : "";
   return [`${w.title}, ${CATEGORY_LABEL[w.category]}${w.wip ? ", in progress" : ""}.`, w.about, action].filter(Boolean).join(" ");
 }
